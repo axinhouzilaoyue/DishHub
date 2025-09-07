@@ -28,8 +28,9 @@
 
 1.  数据库创建成功后，进入该数据库的详情页。
 2.  切换到 **控制台 (Console)** 标签页。
-3.  将下面的 SQL 语句粘贴到输入框中，然后点击 **执行**，以创建 `dishes` 表：
+3.  将下面的 SQL 语句**分两次**粘贴到输入框中，然后点击 **执行**，以创建 `dishes` 和 `cooking_log` 两个表：
 
+**表 1: `dishes` (菜谱表)**
 ```sql
 CREATE TABLE dishes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -40,11 +41,23 @@ CREATE TABLE dishes (
     servings INTEGER DEFAULT 2,
     ingredients TEXT DEFAULT '[]',
     instructions TEXT DEFAULT '[]',
-    image TEXT DEFAULT '',
+    image TEXT DEFAULT '', -- 作为菜谱的“封面照片”
     tags TEXT DEFAULT '[]',
     tutorial_url TEXT DEFAULT '',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+**表 2: `cooking_log` (烹饪日志表)**
+```sql
+CREATE TABLE cooking_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    dish_id INTEGER NOT NULL,
+    image_url TEXT,
+    notes TEXT,
+    cooked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE
 );
 ```
 
