@@ -5,7 +5,7 @@ const dishRoutes = require('./routes/dishes');
 const { initDatabase } = require('./database/init');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 4001;
 
 // 中间件
 app.use(cors());
