@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Clock, Users, Star, Edit, Trash2, ArrowLeft, ExternalLink, Play } from 'lucide-react';
 import { dishAPI } from '../services/api';
 import { Dish } from '../types';
+import { getDifficultyText, getDifficultyColor } from '../utils/dish';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const DishDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -47,22 +49,9 @@ const DishDetailPage: React.FC = () => {
     }
   };
 
-  const getDifficultyText = (difficulty: number) => {
-    const levels = ['', '简单', '一般', '中等', '困难', '大师'];
-    return levels[difficulty] || '未知';
-  };
-
-  const getDifficultyColor = (difficulty: number) => {
-    const colors = ['', 'text-green-600', 'text-yellow-600', 'text-orange-600', 'text-red-600', 'text-purple-600'];
-    return colors[difficulty] || 'text-gray-600';
-  };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-lg text-gray-600">加载中...</div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error || !dish) {

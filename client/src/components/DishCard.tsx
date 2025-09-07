@@ -2,21 +2,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Clock, Users, Star } from 'lucide-react';
 import { Dish } from '../types';
+import { getDifficultyText, getDifficultyColor } from '../utils/dish';
 
 interface DishCardProps {
   dish: Dish;
 }
 
 const DishCard: React.FC<DishCardProps> = ({ dish }) => {
-  const getDifficultyText = (difficulty: number) => {
-    const levels = ['', '简单', '一般', '中等', '困难', '大师'];
-    return levels[difficulty] || '未知';
-  };
-
-  const getDifficultyColor = (difficulty: number) => {
-    const colors = ['', 'text-green-600', 'text-yellow-600', 'text-orange-600', 'text-red-600', 'text-purple-600'];
-    return colors[difficulty] || 'text-gray-600';
-  };
 
   return (
     <Link to={`/dish/${dish.id}`} className="block">

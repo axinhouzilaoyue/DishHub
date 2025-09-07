@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Minus, Save, X, ExternalLink } from 'lucide-react';
 import { dishAPI } from '../services/api';
 import { DishFormData, Dish } from '../types';
+import { formatTags } from '../utils/dish';
 
 interface DishFormProps {
   dish?: Dish;
@@ -78,7 +79,7 @@ const DishForm: React.FC<DishFormProps> = ({ dish, isEditing = false }) => {
 
   // 处理标签
   const handleTagsChange = (tagsString: string) => {
-    const tags = tagsString.split(',').map(tag => tag.trim()).filter(tag => tag);
+    const tags = formatTags(tagsString);
     handleInputChange('tags', tags);
   };
 

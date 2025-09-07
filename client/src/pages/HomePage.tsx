@@ -3,6 +3,7 @@ import { Search, Filter } from 'lucide-react';
 import { dishAPI } from '../services/api';
 import { Dish } from '../types';
 import DishCard from '../components/DishCard';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const HomePage: React.FC = () => {
   const [dishes, setDishes] = useState<Dish[]>([]);
@@ -75,11 +76,7 @@ const HomePage: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-lg text-gray-600">加载中...</div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {
