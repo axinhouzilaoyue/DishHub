@@ -17,7 +17,7 @@ COPY . .
 RUN mkdir -p data
 
 # 暴露端口
-EXPOSE 3001
+EXPOSE 4001
 
 # 启动应用
 CMD ["npm", "start"]
