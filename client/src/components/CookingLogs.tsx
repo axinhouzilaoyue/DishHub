@@ -29,7 +29,9 @@ const CookingLogs: React.FC<CookingLogsProps> = ({ dishId, dishName }) => {
     try {
       setLoading(true);
       const data = await cookingLogAPI.getCookingLogs(dishId);
-      setLogs(data);
+      // 确保按时间倒序排列（最新的在最上面）
+      const sortedData = data.sort((a, b) => new Date(b.cooked_at).getTime() - new Date(a.cooked_at).getTime());
+      setLogs(sortedData);
     } catch (error) {
       console.error('加载烹饪日志失败:', error);
     } finally {
