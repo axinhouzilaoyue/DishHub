@@ -13,26 +13,38 @@ const HomePage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [error, setError] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [isComposing, setIsComposing] = useState(false);
 
   // 搜索防抖
   useEffect(() => {
-    if (searchTerm !== debouncedSearchTerm) {
-      setIsSearching(true);
-    }
+    // 如果正在输入中文，不触发搜索
+    if (isComposing) return;
     
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-      setIsSearching(false);
     }, 500); // 500ms 防抖
 
     return () => clearTimeout(timer);
+  }, [searchTerm, isComposing]);
+
+  // 搜索状态管理
+  useEffect(() => {
+    if (searchTerm !== debouncedSearchTerm && searchTerm !== '') {
+      setIsSearching(true);
+    } else {
+      setIsSearching(false);
+    }
   }, [searchTerm, debouncedSearchTerm]);
 
   // 加载数据
   useEffect(() => {
     const loadData = async () => {
       try {
-        setLoading(true);
+        // 只有在真正需要重新加载时才显示loading
+        if (dishes.length === 0) {
+          setLoading(true);
+        }
+        
         const [dishesData, categoriesData] = await Promise.all([
           dishAPI.getAllDishes({
             search: debouncedSearchTerm || undefined,
@@ -48,6 +60,7 @@ const HomePage: React.FC = () => {
         setError('加载数据失败，请稍后重试');
       } finally {
         setLoading(false);
+        setIsSearching(false);
       }
     };
 
@@ -103,6 +116,8 @@ const HomePage: React.FC = () => {
                 placeholder="搜索菜品名称、食材或制作方法..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                onCompositionStart={() => setIsComposing(true)}
+                onCompositionEnd={() => setIsComposing(false)}
                 className="input pl-10 pr-10"
               />
               {isSearching && (
