@@ -112,24 +112,30 @@ Cloudflare Pages 会自动从 GitHub 拉取代码，执行构建命令，并将�
 
 ## 本地开发 (使用 Wrangler)
 
-如果你想在本地模拟 Cloudflare 环境进行开发和调试：
+为了在本地模拟 Cloudflare 环境进行开发和调试，我们推荐使用 Wrangler 与 Vite 开发服务器集成的方式，以获得最佳的热重载体验。
 
-1.  **安装 Wrangler**:
+1.  **安装 Wrangler (只需一次)**:
     ```bash
     npm install -g wrangler
     ```
 
-2.  **登录 Wrangler**:
+2.  **登录 Wrangler (只需一次)**:
     ```bash
     wrangler login
     ```
+    该命令会打开浏览器引导您完成登录和授权。
 
-3.  **在 `client` 目录下运行开发服务器**:
+3.  **启动本地开发服务器**:
+    在项目的**根目录**下，运行以下命令：
     ```bash
     cd client
-    wrangler pages dev . --d1=DB
+    wrangler pages dev --d1=DB -- npm run dev
     ```
-    - `.` 指的是当前目录作为静态资源目录。
-    - `--d1=DB` 会让你选择要绑定的本地或远程 D1 数据库，用于本地开发。
 
-现在你可以在本地访问应用，并且 API 会连接到你指定的 D1 数据库，获得和线上一致的开发体验。
+    **命令解释**:
+    - `wrangler pages dev`: 启动 Wrangler 的本地模拟器，它会负责运行 `functions` 目录下的所有后端 API。
+    - `--d1=DB`: 将代码中的 `env.DB` 变量绑定到一个 D1 数据库。首次运行时，它会**在命令行中提示**您选择一个您账户下的云端数据库，或为您创建一个本地模拟数据库。
+    - `-- npm run dev`: 代理 Vite 开发服务器。Wrangler 会启动 Vite，并将所有前端相关的请求转发给它，从而实现**代码热重载**。
+
+4.  **访问应用**:
+    启动成功后，Wrangler 会在命令行中显示一个本地访问地址，通常是 `http://localhost:8788`。打开它，您就可以像以前一样进行开发了，修改前端代码会立即在浏览器中生效。
