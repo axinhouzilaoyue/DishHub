@@ -39,9 +39,51 @@ const initDatabase = () => {
         reject(err);
       } else {
         console.log('✅ 数据库表初始化完成');
-        // 插入示例数据
-        insertSampleData().then(resolve).catch(reject);
+        // 检查并添加新字段
+        addMissingColumns().then(() => {
+          // 插入示例数据
+          insertSampleData().then(resolve).catch(reject);
+        }).catch(reject);
       }
+    });
+  });
+};
+
+// 添加缺失的字段
+const addMissingColumns = () => {
+  return new Promise((resolve, reject) => {
+    // 检查 tutorial_url 字段是否存在
+    db.get("PRAGMA table_info(dishes)", (err, result) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      // 获取所有列信息
+      db.all("PRAGMA table_info(dishes)", (err, columns) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        const hasToolTorialUrl = columns.some(col => col.name === 'tutorial_url');
+        
+        if (!hasToolTorialUrl) {
+          console.log('🔧 添加 tutorial_url 字段...');
+          db.run("ALTER TABLE dishes ADD COLUMN tutorial_url TEXT", (err) => {
+            if (err) {
+              console.error('添加字段失败:', err.message);
+              reject(err);
+            } else {
+              console.log('✅ tutorial_url 字段添加成功');
+              resolve();
+            }
+          });
+        } else {
+          console.log('✅ tutorial_url 字段已存在');
+          resolve();
+        }
+      });
     });
   });
 };
