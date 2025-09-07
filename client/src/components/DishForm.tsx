@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Minus, Save, X } from 'lucide-react';
+import { Plus, Minus, Save, X, ExternalLink } from 'lucide-react';
 import { dishAPI } from '../services/api';
 import { DishFormData, Dish } from '../types';
 
@@ -22,6 +22,7 @@ const DishForm: React.FC<DishFormProps> = ({ dish, isEditing = false }) => {
     instructions: [''],
     image: '',
     tags: [],
+    tutorial_url: '',
   });
 
   // 如果是编辑模式，填充表单数据
@@ -37,6 +38,7 @@ const DishForm: React.FC<DishFormProps> = ({ dish, isEditing = false }) => {
         instructions: dish.instructions.length > 0 ? dish.instructions : [''],
         image: dish.image || '',
         tags: dish.tags,
+        tutorial_url: dish.tutorial_url || '',
       });
     }
   }, [dish]);
@@ -223,6 +225,35 @@ const DishForm: React.FC<DishFormProps> = ({ dish, isEditing = false }) => {
                 className="input"
                 placeholder="https://..."
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                教程链接（可选）
+              </label>
+              <div className="relative">
+                <input
+                  type="url"
+                  value={formData.tutorial_url}
+                  onChange={(e) => handleInputChange('tutorial_url', e.target.value)}
+                  className="input pr-10"
+                  placeholder="https://www.bilibili.com/video/..."
+                />
+                {formData.tutorial_url && (
+                  <a
+                    href={formData.tutorial_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary-500 hover:text-primary-600"
+                    title="在新窗口打开教程"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                可以添加B站、YouTube等视频教程链接
+              </p>
             </div>
           </div>
 

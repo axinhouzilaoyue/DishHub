@@ -98,7 +98,8 @@ router.post('/', (req, res) => {
     ingredients = [],
     instructions = [],
     image = '',
-    tags = []
+    tags = [],
+    tutorial_url = ''
   } = req.body;
 
   if (!name || !ingredients.length || !instructions.length) {
@@ -107,8 +108,8 @@ router.post('/', (req, res) => {
   }
 
   const sql = `
-    INSERT INTO dishes (name, category, difficulty, cooking_time, servings, ingredients, instructions, image, tags)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO dishes (name, category, difficulty, cooking_time, servings, ingredients, instructions, image, tags, tutorial_url)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const params = [
@@ -120,7 +121,8 @@ router.post('/', (req, res) => {
     JSON.stringify(ingredients),
     JSON.stringify(instructions),
     image,
-    JSON.stringify(tags)
+    JSON.stringify(tags),
+    tutorial_url
   ];
 
   db.run(sql, params, function(err) {
@@ -149,7 +151,8 @@ router.put('/:id', (req, res) => {
     ingredients,
     instructions,
     image,
-    tags
+    tags,
+    tutorial_url
   } = req.body;
 
   if (!name || !ingredients?.length || !instructions?.length) {
@@ -160,7 +163,7 @@ router.put('/:id', (req, res) => {
   const sql = `
     UPDATE dishes 
     SET name = ?, category = ?, difficulty = ?, cooking_time = ?, servings = ?,
-        ingredients = ?, instructions = ?, image = ?, tags = ?, updated_at = CURRENT_TIMESTAMP
+        ingredients = ?, instructions = ?, image = ?, tags = ?, tutorial_url = ?, updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
   `;
 
@@ -174,6 +177,7 @@ router.put('/:id', (req, res) => {
     JSON.stringify(instructions),
     image,
     JSON.stringify(tags),
+    tutorial_url,
     id
   ];
 

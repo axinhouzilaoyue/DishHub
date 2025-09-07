@@ -27,6 +27,7 @@ const initDatabase = () => {
         instructions TEXT NOT NULL,
         image TEXT,
         tags TEXT,
+        tutorial_url TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )

@@ -9,6 +9,7 @@ export interface Dish {
   instructions: string[];
   image?: string;
   tags: string[];
+  tutorial_url?: string;
   created_at: string;
   updated_at: string;
 }
@@ -23,4 +24,5 @@ export interface DishFormData {
   instructions: string[];
   image?: string;
   tags: string[];
+  tutorial_url?: string;
 }

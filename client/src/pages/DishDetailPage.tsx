@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Clock, Users, Star, Edit, Trash2, ArrowLeft } from 'lucide-react';
+import { Clock, Users, Star, Edit, Trash2, ArrowLeft, ExternalLink, Play } from 'lucide-react';
 import { dishAPI } from '../services/api';
 import { Dish } from '../types';
 
@@ -142,6 +142,22 @@ const DishDetailPage: React.FC = () => {
                   {tag}
                 </span>
               ))}
+            </div>
+          )}
+
+          {/* 教程链接 */}
+          {dish.tutorial_url && (
+            <div className="mb-6">
+              <a
+                href={dish.tutorial_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center space-x-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors"
+              >
+                <Play className="h-4 w-4" />
+                <span>观看视频教程</span>
+                <ExternalLink className="h-3 w-3" />
+              </a>
             </div>
           )}
 
