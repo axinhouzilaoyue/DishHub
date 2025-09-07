@@ -41,7 +41,7 @@ CREATE TABLE dishes (
     servings INTEGER DEFAULT 2,
     ingredients TEXT DEFAULT '[]',
     instructions TEXT DEFAULT '[]',
-    image TEXT DEFAULT '', -- 作为菜谱的“封面照片”
+    image TEXT DEFAULT '',
     tags TEXT DEFAULT '[]',
     tutorial_url TEXT DEFAULT '',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
