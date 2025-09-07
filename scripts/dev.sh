@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# 开发环境启动脚本
+# DishHub 开发环境启动脚本
 
 echo "🚀 启动 DishHub 开发环境..."
 
-# 检查是否已安装依赖
+# 检查依赖
 if [ ! -d "node_modules" ]; then
     echo "📦 安装根目录依赖..."
     npm install
@@ -20,7 +20,7 @@ if [ ! -d "client/node_modules" ]; then
     cd client && npm install && cd ..
 fi
 
-echo "✅ 依赖安装完成"
+echo "✅ 依赖检查完成"
 
 # 启动开发服务器
 echo "🔥 启动开发服务器..."

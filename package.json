@@ -8,8 +8,7 @@
     "server:dev": "cd server && npm run dev",
     "client:dev": "cd client && npm run dev",
     "build": "cd client && npm run build",
-    "start": "cd server && npm start",
-    "install:all": "npm install && cd server && npm install && cd ../client && npm install"
+    "start": "cd server && npm start"
   },
   "keywords": ["菜单", "食谱", "家庭"],
   "author": "axin",
