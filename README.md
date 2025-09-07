@@ -16,14 +16,15 @@
 
 ```bash
 # 克隆项目
-git clone <repository-url>
+git clone https://github.com/axinhouzilaoyue/DishHub.git
 cd DishHub
 
 # 一键部署（推荐）
 ./scripts/deploy.sh
 
-# 或者手动部署
-docker-compose up -d --build
+# 或者手动部署（支持新旧版本）
+docker compose up -d --build
+# 或 docker-compose up -d --build
 
 # 访问应用
 # 前端: http://localhost:3000
@@ -114,8 +115,30 @@ interface Dish {
 
 ### 生产环境
 1. 确保服务器安装了 Docker 和 Docker Compose
-2. 运行 `./scripts/deploy.sh` 或 `docker-compose up -d --build`
-3. 数据会持久化存储在 Docker volume 中
+2. 检查环境：`./scripts/check-docker.sh`
+3. 一键部署：`./scripts/deploy.sh`
+4. 数据会持久化存储在 Docker volume 中
+
+### 常用命令
+```bash
+# 检查 Docker 环境
+./scripts/check-docker.sh
+
+# 部署应用
+./scripts/deploy.sh
+
+# 查看日志
+docker compose logs -f
+# 或 docker-compose logs -f
+
+# 停止服务
+docker compose down
+# 或 docker-compose down
+
+# 重启服务
+docker compose restart
+# 或 docker-compose restart
+```
 
 ### 备份数据
 ```bash
