@@ -11,41 +11,36 @@
 | 🎯 **分类筛选** | 按菜系分类浏览，川菜、粤菜、家常菜等 |
 | 🎥 **视频教程** | 为每道菜添加视频教程链接，支持B站、YouTube等 |
 | 📱 **响应式设计** | 完美支持手机、平板、电脑访问 |
-| 🚀 **快速部署** | 提供一键部署脚本，原生环境快速启动 |
-| 💾 **数据安全** | SQLite本地存储，数据完全可控 |
+| 🚀 **快速部署** | 已适配 Cloudflare Pages 一键部署 |
+| 💾 **数据安全** | Cloudflare D1 全球分布式数据库 |
 
 ## 🚀 快速开始
 
-### 方式1：一键部署
+### 方式1：Cloudflare 部署 (推荐)
+
+本项目已为 Cloudflare Pages 和 D1 数据库深度优化，可以实现一键部署、全球加速和极低的维护成本。
+
+详细步骤请参考：[**Cloudflare 部署教程**](./DEPLOY_CLOUDFLARE.md)
+
+### 方式2：本地开发
 
 ```bash
 # 1. 克隆项目
 git clone https://github.com/axinhouzilaoyue/DishHub.git
 cd DishHub
 
-# 2. 一键部署
-./scripts/deploy.sh
+# 2. 安装依赖
+npm install
+cd client && npm install && cd ..
 
-# 3. 访问应用
-# 🌐 前端: http://localhost:4000
-# 🔧 API: http://localhost:4001
-```
+# 3. 启动开发环境 (使用 Cloudflare Wrangler)
+# (首次运行需要 npm install -g wrangler 和 wrangler login)
+cd client
+wrangler pages dev . --d1=DB
+# 根据提示选择本地或远程 D1 数据库
 
-### 方式2：本地开发
-
-```bash
-# 1. 安装依赖
-# (如果根目录、client、server目录没有node_modules, dev.sh会自动安装)
-npm install # 根目录
-cd client && npm install && cd .. # 前端
-cd server && npm install && cd .. # 后端
-
-# 2. 启动开发环境
-./scripts/dev.sh
-
-# 3. 访问开发环境
-# 🌐 前端: http://localhost:4000
-# 🔧 API: http://localhost:4001
+# 4. 访问开发环境 (端口号以 Wrangler 启动时输出为准)
+# 🌐 前端: http://localhost:8788 
 ```
 
 ### 🎮 使用指南
@@ -63,21 +58,19 @@ cd server && npm install && cd .. # 后端
 ### 技术栈
 ```
 前端：React 18 + TypeScript + Tailwind CSS + Vite
-后端：Node.js + Express + SQLite
+后端：Cloudflare Pages Functions (Workers) + D1 数据库
 ```
 
 ### 项目结构
 ```
 DishHub/
-├── 📁 client/              # 前端应用
-│   ├── src/components/     # React组件
-│   ├── src/pages/         # 页面组件
-│   └── src/services/      # API服务
-├── 📁 server/              # 后端API
-│   ├── database/          # 数据库配置
-│   └── routes/            # API路由
-├── 📁 scripts/             # 部署和开发脚本
+├── 📁 client/              # 前端应用和 API Functions
+│   ├── src/               # React 源码
+│   └── functions/         # Cloudflare Pages Functions (后端API)
+│       └── api/
+├── 📁 scripts/             # 开发和部署辅助脚本
 └── 📋 README.md           # 项目说明
+└── 📋 DEPLOY_CLOUDFLARE.md # Cloudflare 部署教程
 ```
 
 ## 📡 API接口
