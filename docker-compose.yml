@@ -7,7 +7,7 @@ services:
       context: ./server
       dockerfile: Dockerfile
     ports:
-      - "3001:3001"
+      - "0.0.0.0:4001:3001"
     volumes:
       - ./server/data:/app/data
     environment:
@@ -21,7 +21,7 @@ services:
       context: ./client
       dockerfile: Dockerfile
     ports:
-      - "3000:80"
+      - "0.0.0.0:4000:80"
     depends_on:
       - backend
     restart: unless-stopped

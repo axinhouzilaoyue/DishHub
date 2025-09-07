@@ -40,8 +40,9 @@ $COMPOSE_CMD ps
 
 echo ""
 echo "🎉 部署完成！"
-echo "📱 前端访问地址: http://localhost:3000"
-echo "🔧 后端API地址: http://localhost:3001"
+echo "📱 前端访问地址: http://localhost:4000"
+echo "🔧 后端API地址: http://localhost:4001"
+echo "🌐 外网访问: http://你的服务器IP:4000"
 echo ""
 echo "💡 常用命令:"
 echo "  查看日志: $COMPOSE_CMD logs -f"

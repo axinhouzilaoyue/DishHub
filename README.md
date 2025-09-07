@@ -27,8 +27,8 @@ docker compose up -d --build
 # 或 docker-compose up -d --build
 
 # 访问应用
-# 前端: http://localhost:3000
-# 后端API: http://localhost:3001
+# 前端: http://localhost:4000
+# 后端API: http://localhost:4001
 ```
 
 ### 本地开发
@@ -138,6 +138,23 @@ docker compose down
 # 重启服务
 docker compose restart
 # 或 docker-compose restart
+```
+
+### 外网访问配置
+项目已配置为绑定到所有网络接口 (`0.0.0.0`)，支持外网访问：
+- **前端**: `http://你的服务器IP:4000`
+- **后端API**: `http://你的服务器IP:4001`
+
+确保服务器防火墙开放端口：
+```bash
+# Ubuntu/Debian
+sudo ufw allow 4000
+sudo ufw allow 4001
+
+# CentOS/RHEL
+sudo firewall-cmd --permanent --add-port=4000/tcp
+sudo firewall-cmd --permanent --add-port=4001/tcp
+sudo firewall-cmd --reload
 ```
 
 ### 备份数据
