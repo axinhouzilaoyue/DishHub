@@ -38,6 +38,11 @@ const buildGetListQuery = (url) => {
  * GET /api/dishes/:id -> 返回单个
  */
 export async function onRequestGet({ env, params, request }) {
+  // 增强错误诊断
+  if (!env.DB) {
+    return new Response(JSON.stringify({ error: 'Database binding not found. Please check your wrangler.toml or --d1 flag.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+  }
+
   try {
     const db = env.DB;
     const path = params.path;
@@ -62,7 +67,12 @@ export async function onRequestGet({ env, params, request }) {
       return new Response(JSON.stringify(results.map(parseRow)), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
   } catch (e) {
-    return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    console.error('Error in onRequestGet:', e); // 在终端明确打印错误
+    return new Response(JSON.stringify({ 
+      error: 'An internal server error occurred.',
+      message: e.message,
+      stack: e.stack, // 返回详细的堆栈信息
+    }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
 
@@ -70,6 +80,9 @@ export async function onRequestGet({ env, params, request }) {
  * POST /api/dishes -> 创建
  */
 export async function onRequestPost({ env, request }) {
+  if (!env.DB) {
+    return new Response(JSON.stringify({ error: 'Database binding not found.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+  }
   try {
     const db = env.DB;
     const dish = await request.json();
@@ -99,7 +112,8 @@ export async function onRequestPost({ env, request }) {
     return new Response(JSON.stringify({ id: lastRowId, message: '菜品添加成功' }), { status: 201, headers: { 'Content-Type': 'application/json' } });
 
   } catch (e) {
-    return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    console.error('Error in onRequestPost:', e);
+    return new Response(JSON.stringify({ error: e.message, stack: e.stack }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
 
@@ -107,6 +121,9 @@ export async function onRequestPost({ env, request }) {
  * PUT /api/dishes/:id -> 更新
  */
 export async function onRequestPut({ env, request, params }) {
+  if (!env.DB) {
+    return new Response(JSON.stringify({ error: 'Database binding not found.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+  }
   try {
     const db = env.DB;
     const path = params.path;
@@ -141,7 +158,8 @@ export async function onRequestPut({ env, request, params }) {
     return new Response(JSON.stringify({ message: '菜品更新成功' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
   } catch (e) {
-    return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    console.error('Error in onRequestPut:', e);
+    return new Response(JSON.stringify({ error: e.message, stack: e.stack }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
 
@@ -149,6 +167,9 @@ export async function onRequestPut({ env, request, params }) {
  * DELETE /api/dishes/:id -> 删除
  */
 export async function onRequestDelete({ env, params }) {
+  if (!env.DB) {
+    return new Response(JSON.stringify({ error: 'Database binding not found.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+  }
   try {
     const db = env.DB;
     const path = params.path;
@@ -166,6 +187,7 @@ export async function onRequestDelete({ env, params }) {
     return new Response(JSON.stringify({ message: '菜品删除成功' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
   } catch (e) {
-    return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    console.error('Error in onRequestDelete:', e);
+    return new Response(JSON.stringify({ error: e.message, stack: e.stack }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
