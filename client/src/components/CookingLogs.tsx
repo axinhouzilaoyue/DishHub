@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Calendar, Image, MessageSquare, X, ChefHat } from 'lucide-react';
+import { Plus, Calendar, Image, MessageSquare, X, ChefHat, Edit2, Trash2, Save, RotateCcw } from 'lucide-react';
 import { cookingLogAPI } from '../services/api';
-import { CookingLog, CookingLogFormData } from '../types';
+import { CookingLog, CookingLogFormData, CookingLogUpdateData } from '../types';
 
 interface CookingLogsProps {
   dishId: number;
@@ -17,6 +17,12 @@ const CookingLogs: React.FC<CookingLogsProps> = ({ dishId, dishName }) => {
     image_url: '',
     notes: ''
   });
+  
+  // 编辑相关状态
+  const [editingLog, setEditingLog] = useState<number | null>(null);
+  const [editFormData, setEditFormData] = useState<CookingLogUpdateData>({});
+  const [updating, setUpdating] = useState(false);
+  const [deleting, setDeleting] = useState<number | null>(null);
 
   // 加载烹饪日志
   const loadLogs = async () => {
@@ -55,6 +61,61 @@ const CookingLogs: React.FC<CookingLogsProps> = ({ dishId, dishName }) => {
       alert('添加失败，请稍后重试');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  // 开始编辑日志
+  const startEdit = (log: CookingLog) => {
+    setEditingLog(log.id);
+    setEditFormData({
+      image_url: log.image_url || '',
+      notes: log.notes || '',
+      cooked_at: new Date(log.cooked_at).toISOString().slice(0, 16) // 格式化为datetime-local输入格式
+    });
+  };
+
+  // 取消编辑
+  const cancelEdit = () => {
+    setEditingLog(null);
+    setEditFormData({});
+  };
+
+  // 保存编辑
+  const saveEdit = async () => {
+    if (!editFormData.image_url && !editFormData.notes) {
+      alert('请至少输入图片链接或烹饪笔记');
+      return;
+    }
+
+    try {
+      setUpdating(true);
+      await cookingLogAPI.updateCookingLog(editingLog!, editFormData);
+      setEditingLog(null);
+      setEditFormData({});
+      await loadLogs(); // 重新加载日志
+    } catch (error) {
+      console.error('更新烹饪日志失败:', error);
+      alert('更新失败，请稍后重试');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  // 删除日志
+  const deleteLog = async (logId: number) => {
+    if (!window.confirm('确定要删除这条烹饪记录吗？')) {
+      return;
+    }
+
+    try {
+      setDeleting(logId);
+      await cookingLogAPI.deleteCookingLog(logId);
+      await loadLogs(); // 重新加载日志
+    } catch (error) {
+      console.error('删除烹饪日志失败:', error);
+      alert('删除失败，请稍后重试');
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -191,30 +252,136 @@ const CookingLogs: React.FC<CookingLogsProps> = ({ dishId, dishName }) => {
         <div className="space-y-4">
           {logs.map((log) => (
             <div key={log.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-sm transition-shadow">
-              <div className="flex items-center space-x-2 text-sm text-gray-600 mb-4">
-                <Calendar className="h-4 w-4" />
-                <span>{formatDate(log.cooked_at)}</span>
-              </div>
-
-              {log.image_url && (
-                <div className="mb-4">
-                  <img
-                    src={log.image_url}
-                    alt="烹饪成果"
-                    className="w-full max-w-md h-48 object-cover rounded-lg"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                </div>
-              )}
-
-              {log.notes && (
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="flex items-start space-x-2">
-                    <MessageSquare className="h-4 w-4 text-gray-600 mt-0.5 flex-shrink-0" />
-                    <p className="text-gray-700 leading-relaxed">{log.notes}</p>
+              {editingLog === log.id ? (
+                /* 编辑模式 */
+                <div className="space-y-4">
+                  {/* 编辑烹饪时间 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <Calendar className="inline h-4 w-4 mr-1" />
+                      烹饪时间
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={editFormData.cooked_at || ''}
+                      onChange={(e) => setEditFormData({ ...editFormData, cooked_at: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
                   </div>
+
+                  {/* 编辑图片链接 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <Image className="inline h-4 w-4 mr-1" />
+                      成品照片链接
+                    </label>
+                    <input
+                      type="url"
+                      value={editFormData.image_url || ''}
+                      onChange={(e) => setEditFormData({ ...editFormData, image_url: e.target.value })}
+                      placeholder="https://example.com/image.jpg"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
+                    {editFormData.image_url && (
+                      <div className="mt-2">
+                        <img
+                          src={editFormData.image_url}
+                          alt="预览"
+                          className="w-32 h-24 object-cover rounded-md"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 编辑烹饪笔记 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <MessageSquare className="inline h-4 w-4 mr-1" />
+                      烹饪笔记
+                    </label>
+                    <textarea
+                      value={editFormData.notes || ''}
+                      onChange={(e) => setEditFormData({ ...editFormData, notes: e.target.value })}
+                      placeholder="记录制作心得、调味技巧、改进建议等..."
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                    />
+                  </div>
+
+                  {/* 编辑操作按钮 */}
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={saveEdit}
+                      disabled={updating}
+                      className="btn btn-primary flex items-center space-x-1"
+                    >
+                      <Save className="h-4 w-4" />
+                      <span>{updating ? '保存中...' : '保存'}</span>
+                    </button>
+                    <button
+                      onClick={cancelEdit}
+                      disabled={updating}
+                      className="btn btn-secondary flex items-center space-x-1"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                      <span>取消</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* 显示模式 */
+                <div>
+                  {/* 日期和操作按钮 */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <Calendar className="h-4 w-4" />
+                      <span>{formatDate(log.cooked_at)}</span>
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => startEdit(log)}
+                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="编辑记录"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteLog(log.id)}
+                        disabled={deleting === log.id}
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                        title="删除记录"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 成品图片 */}
+                  {log.image_url && (
+                    <div className="mb-4">
+                      <img
+                        src={log.image_url}
+                        alt="烹饪成果"
+                        className="w-full max-w-md h-48 object-cover rounded-lg"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {/* 烹饪笔记 */}
+                  {log.notes && (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex items-start space-x-2">
+                        <MessageSquare className="h-4 w-4 text-gray-600 mt-0.5 flex-shrink-0" />
+                        <p className="text-gray-700 leading-relaxed">{log.notes}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

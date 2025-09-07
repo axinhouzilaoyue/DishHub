@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Dish, DishFormData, CookingLog, CookingLogFormData } from '../types';
+import { Dish, DishFormData, CookingLog, CookingLogFormData, CookingLogUpdateData } from '../types';
 
 const api = axios.create({
   baseURL: '/api',
@@ -58,6 +58,18 @@ export const cookingLogAPI = {
   // 添加烹饪日志
   addCookingLog: async (dishId: number, data: CookingLogFormData): Promise<{ id: number; message: string }> => {
     const response = await api.post(`/dishes/${dishId}/logs`, data);
+    return response.data;
+  },
+
+  // 更新烹饪日志
+  updateCookingLog: async (logId: number, data: CookingLogUpdateData): Promise<{ message: string }> => {
+    const response = await api.put(`/logs/${logId}`, data);
+    return response.data;
+  },
+
+  // 删除烹饪日志
+  deleteCookingLog: async (logId: number): Promise<{ message: string }> => {
+    const response = await api.delete(`/logs/${logId}`);
     return response.data;
   },
 };

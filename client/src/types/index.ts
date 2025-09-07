@@ -39,3 +39,9 @@ export interface CookingLogFormData {
   image_url?: string;
   notes?: string;
 }
+
+export interface CookingLogUpdateData {
+  image_url?: string;
+  notes?: string;
+  cooked_at?: string;
+}
