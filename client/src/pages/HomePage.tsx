@@ -9,8 +9,24 @@ const HomePage: React.FC = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [error, setError] = useState<string | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // 搜索防抖
+  useEffect(() => {
+    if (searchTerm !== debouncedSearchTerm) {
+      setIsSearching(true);
+    }
+    
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setIsSearching(false);
+    }, 500); // 500ms 防抖
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, debouncedSearchTerm]);
 
   // 加载数据
   useEffect(() => {
@@ -19,7 +35,7 @@ const HomePage: React.FC = () => {
         setLoading(true);
         const [dishesData, categoriesData] = await Promise.all([
           dishAPI.getAllDishes({
-            search: searchTerm || undefined,
+            search: debouncedSearchTerm || undefined,
             category: selectedCategory !== 'all' ? selectedCategory : undefined,
           }),
           dishAPI.getCategories(),
@@ -36,12 +52,13 @@ const HomePage: React.FC = () => {
     };
 
     loadData();
-  }, [searchTerm, selectedCategory]);
+  }, [debouncedSearchTerm, selectedCategory]);
 
   // 搜索处理
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // 搜索逻辑已在useEffect中处理
+    // 立即触发搜索（跳过防抖）
+    setDebouncedSearchTerm(searchTerm);
   };
 
   if (loading) {
@@ -86,8 +103,13 @@ const HomePage: React.FC = () => {
                 placeholder="搜索菜品名称、食材或制作方法..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="input pl-10"
+                className="input pl-10 pr-10"
               />
+              {isSearching && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary-500 border-t-transparent"></div>
+                </div>
+              )}
             </div>
           </form>
 
