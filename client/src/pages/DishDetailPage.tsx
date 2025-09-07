@@ -5,6 +5,7 @@ import { dishAPI } from '../services/api';
 import { Dish } from '../types';
 import { getDifficultyText, getDifficultyColor } from '../utils/dish';
 import LoadingSpinner from '../components/LoadingSpinner';
+import CookingLogs from '../components/CookingLogs';
 
 const DishDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -187,7 +188,7 @@ const DishDetailPage: React.FC = () => {
           </div>
 
           {/* 制作步骤 */}
-          <div>
+          <div className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">制作步骤</h2>
             <div className="space-y-4">
               {dish.instructions.map((instruction, index) => (
@@ -201,6 +202,11 @@ const DishDetailPage: React.FC = () => {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* 烹饪记录 */}
+          <div>
+            <CookingLogs dishId={dish.id} dishName={dish.name} />
           </div>
         </div>
       </div>

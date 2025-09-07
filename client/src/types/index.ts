@@ -26,3 +26,16 @@ export interface DishFormData {
   tags: string[];
   tutorial_url?: string;
 }
+
+export interface CookingLog {
+  id: number;
+  dish_id: number;
+  image_url?: string;
+  notes?: string;
+  cooked_at: string;
+}
+
+export interface CookingLogFormData {
+  image_url?: string;
+  notes?: string;
+}

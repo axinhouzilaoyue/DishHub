@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Dish, DishFormData } from '../types';
+import { Dish, DishFormData, CookingLog, CookingLogFormData } from '../types';
 
 const api = axios.create({
   baseURL: '/api',
@@ -44,6 +44,20 @@ export const dishAPI = {
   // 获取所有分类
   getCategories: async (): Promise<string[]> => {
     const response = await api.get('/dishes/categories');
+    return response.data;
+  },
+};
+
+export const cookingLogAPI = {
+  // 获取指定菜品的烹饪日志
+  getCookingLogs: async (dishId: number): Promise<CookingLog[]> => {
+    const response = await api.get(`/dishes/${dishId}/logs`);
+    return response.data;
+  },
+
+  // 添加烹饪日志
+  addCookingLog: async (dishId: number, data: CookingLogFormData): Promise<{ id: number; message: string }> => {
+    const response = await api.post(`/dishes/${dishId}/logs`, data);
     return response.data;
   },
 };
