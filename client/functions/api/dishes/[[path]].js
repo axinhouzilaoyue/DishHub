@@ -93,7 +93,7 @@ export async function onRequestPost({ env, request }) {
 
     const sql = `
       INSERT INTO dishes (name, category, difficulty, cooking_time, servings, ingredients, instructions, image, tags, tutorial_url)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id
     `;
     const params = [
       dish.name,
@@ -108,8 +108,14 @@ export async function onRequestPost({ env, request }) {
       dish.tutorial_url || '',
     ];
 
-    const { lastRowId } = await db.prepare(sql).bind(...params).run();
-    return new Response(JSON.stringify({ id: lastRowId, message: '菜品添加成功' }), { status: 201, headers: { 'Content-Type': 'application/json' } });
+    const result = await db.prepare(sql).bind(...params).first();
+    const newId = result ? result.id : null;
+
+    if (!newId) {
+      return new Response(JSON.stringify({ error: 'Failed to create dish and retrieve ID.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+    
+    return new Response(JSON.stringify({ id: newId, message: '菜品添加成功' }), { status: 201, headers: { 'Content-Type': 'application/json' } });
 
   } catch (e) {
     console.error('Error in onRequestPost:', e);
