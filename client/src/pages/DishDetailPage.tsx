@@ -162,50 +162,60 @@ const DishDetailPage: React.FC = () => {
       </header>
 
       {/* Main Info Inset Group */}
-      <section className="ios-grouped-section divide-y divide-[#E5E5EA]">
-        <div className="p-0">
-          {dish.image ? (
-            <img src={dish.image} alt={dish.name} className="aspect-[21/9] max-h-[300px] w-full object-cover" />
-          ) : (
-            <div className="flex aspect-[21/9] max-h-[300px] w-full items-center justify-center bg-slate-100 text-6xl">🍽️</div>
-          )}
-        </div>
-        <div className="p-5">
-          <h1 className="text-[30px] font-black text-[#1C1C1E]">{dish.name}</h1>
-          <div className="mt-2 flex items-center gap-2">
-            <span className="text-[14px] font-semibold text-[#007AFF] uppercase tracking-wider">{dish.category}</span>
-            {dish.tags.length > 0 && (
-              <div className="flex gap-1.5 border-l border-[#E5E5EA] pl-2">
-                {dish.tags.map(tag => (
-                  <span key={tag} className="text-[13px] text-[#8E8E93]">#{tag}</span>
-                ))}
+      <section className="ios-grouped-section p-5">
+        <div className="flex flex-col sm:flex-row items-start gap-5">
+          <div className="h-40 w-40 sm:h-[200px] sm:w-[200px] shrink-0 overflow-hidden rounded-2xl border border-[#E5E5EA] bg-slate-100">
+            {dish.image ? (
+              <img src={dish.image} alt={dish.name} className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-6xl">🍽️</div>
+            )}
+          </div>
+
+          <div className="min-w-0 flex-1 space-y-4">
+            <div>
+              <h1 className="text-[30px] font-black text-[#1C1C1E] leading-tight">{dish.name}</h1>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <span className="text-[14px] font-semibold text-[#007AFF] uppercase tracking-wider">{dish.category}</span>
+                {dish.tags.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-1.5 border-l border-[#E5E5EA] pl-2">
+                    {dish.tags.map(tag => (
+                      <span key={tag} className="text-[13px] text-[#8E8E93]">#{tag}</span>
+                    ))}
+                  </div>
+                )}
               </div>
+            </div>
+
+            <div className="grid grid-cols-3 divide-x divide-[#E5E5EA] rounded-xl border border-[#E5E5EA] bg-white/70">
+              <div className="py-3 text-center">
+                <p className="text-[11px] font-bold uppercase text-[#8E8E93]">时长</p>
+                <p className="text-[15px] font-semibold">{dish.cooking_time}m</p>
+              </div>
+              <div className="py-3 text-center">
+                <p className="text-[11px] font-bold uppercase text-[#8E8E93]">份量</p>
+                <p className="text-[15px] font-semibold">{dish.servings}p</p>
+              </div>
+              <div className="py-3 text-center">
+                <p className="text-[11px] font-bold uppercase text-[#8E8E93]">难度</p>
+                <p className="text-[15px] font-semibold">{getDifficultyText(dish.difficulty)}</p>
+              </div>
+            </div>
+
+            {dish.tutorial_url && (
+              <a
+                href={dish.tutorial_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-[15px] font-semibold text-[#007AFF] bg-[#007AFF]/5 hover:bg-[#007AFF]/10 transition-colors"
+              >
+                <Play className="h-4 w-4 fill-current" />
+                <span>观看视频教程</span>
+                <ChevronRight className="h-4 w-4 text-[#9AA0A6]" />
+              </a>
             )}
           </div>
         </div>
-        <div className="grid grid-cols-3 divide-x divide-[#E5E5EA]">
-          <div className="py-3 text-center">
-            <p className="text-[11px] font-bold uppercase text-[#8E8E93]">时长</p>
-            <p className="text-[15px] font-semibold">{dish.cooking_time}m</p>
-          </div>
-          <div className="py-3 text-center">
-            <p className="text-[11px] font-bold uppercase text-[#8E8E93]">份量</p>
-            <p className="text-[15px] font-semibold">{dish.servings}p</p>
-          </div>
-          <div className="py-3 text-center">
-            <p className="text-[11px] font-bold uppercase text-[#8E8E93]">难度</p>
-            <p className="text-[15px] font-semibold">{getDifficultyText(dish.difficulty)}</p>
-          </div>
-        </div>
-        {dish.tutorial_url && (
-          <a href={dish.tutorial_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 active:bg-slate-50">
-            <div className="flex items-center gap-3">
-              <Play className="h-4 w-4 text-[#007AFF] fill-current" />
-              <span className="text-[16px] font-medium text-[#1C1C1E]">观看视频教程</span>
-            </div>
-            <ChevronRight className="h-4 w-4 text-[#C7C7CC]" />
-          </a>
-        )}
       </section>
 
       {/* Ingredients Group */}
