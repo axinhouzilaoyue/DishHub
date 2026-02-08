@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Clock, Edit, ExternalLink, Play, Star, Trash2, Users } from 'lucide-react';
+import { ArrowLeft, Play, ChevronRight } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { dishAPI } from '../services/api';
 import { Dish } from '../types';
-import { getDifficultyColor, getDifficultyText } from '../utils/dish';
+import { getDifficultyText } from '../utils/dish';
 
 const DishDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,37 +16,23 @@ const DishDetailPage: React.FC = () => {
 
   useEffect(() => {
     const loadDish = async () => {
-      if (!id) {
-        setError('菜品 ID 缺失');
-        setLoading(false);
-        return;
-      }
-
+      if (!id) return setError('菜品 ID 缺失');
       try {
         setLoading(true);
         const data = await dishAPI.getDish(parseInt(id, 10));
         setDish(data);
-        setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : '菜品加载失败');
       } finally {
         setLoading(false);
       }
     };
-
     loadDish();
   }, [id]);
 
   const handleDelete = async () => {
-    if (!dish) {
-      return;
-    }
-
-    const confirmed = window.confirm(`确定删除「${dish.name}」吗？`);
-    if (!confirmed) {
-      return;
-    }
-
+    if (!dish) return;
+    if (!window.confirm(`确定删除「${dish.name}」吗？`)) return;
     try {
       setDeleting(true);
       await dishAPI.deleteDish(dish.id);
@@ -58,131 +44,107 @@ const DishDetailPage: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return <LoadingSpinner message="正在加载菜品详情..." />;
-  }
+  if (loading) return <LoadingSpinner message="正在加载..." />;
 
   if (error || !dish) {
     return (
-      <section className="empty-card">
-        <h2>菜品不可用</h2>
-        <p>{error || '未找到该菜品'}</p>
-        <Link to="/library" className="btn btn-primary">
-          返回菜谱库
-        </Link>
-      </section>
+      <div className="ios-grouped-section mx-auto max-w-lg mt-10 p-8 text-center">
+        <div className="text-4xl mb-4">🍲</div>
+        <h2 className="text-[17px] font-semibold text-[#1C1C1E]">菜品不可用</h2>
+        <p className="mt-1 text-[14px] text-[#8E8E93]">{error || '未找到该菜品'}</p>
+        <Link to="/library" className="mt-6 inline-block text-[15px] font-bold text-[#007AFF]">返回菜谱库</Link>
+      </div>
     );
   }
 
   return (
-    <section className="panel dish-detail-panel">
-      <Link to="/library" className="text-link inline-flex items-center gap-2">
-        <ArrowLeft className="h-4 w-4" />
-        返回菜谱库
-      </Link>
+    <div className="mx-auto max-w-3xl space-y-6">
+      <header className="flex items-center justify-between px-1">
+        <Link to="/library" className="flex items-center gap-1 text-[15px] font-medium text-[#007AFF]">
+          <ArrowLeft className="h-4 w-4" />
+          返回
+        </Link>
+        <div className="flex gap-4">
+          <Link to={`/dish/${dish.id}/edit`} className="text-[15px] font-medium text-[#007AFF]">编辑</Link>
+          <button onClick={handleDelete} disabled={deleting} className="text-[15px] font-medium text-[#FF3B30] disabled:opacity-50">
+            {deleting ? '删除中' : '删除'}
+          </button>
+        </div>
+      </header>
 
-      <div className="detail-image-wrap">
-        <div className="detail-image-inner">
+      {/* Main Info Inset Group */}
+      <section className="ios-grouped-section divide-y divide-[#E5E5EA]">
+        <div className="p-0">
           {dish.image ? (
-            <img src={dish.image} alt={dish.name} className="detail-image" />
+            <img src={dish.image} alt={dish.name} className="aspect-video w-full object-cover" />
           ) : (
-            <div className="dish-image-placeholder">🍽️</div>
+            <div className="flex aspect-[21/9] w-full items-center justify-center bg-slate-100 text-6xl">🍽️</div>
           )}
         </div>
-      </div>
-
-      <div className="detail-content">
-        <header className="detail-header">
-          <div>
-            <h1 className="detail-title">{dish.name}</h1>
-            <span className="dish-category">{dish.category}</span>
+        <div className="p-4">
+          <h1 className="text-xl font-bold text-[#1C1C1E]">{dish.name}</h1>
+          <div className="mt-1 flex items-center gap-2">
+            <span className="text-[13px] font-semibold text-[#007AFF] uppercase tracking-wider">{dish.category}</span>
+            {dish.tags.length > 0 && (
+              <div className="flex gap-1.5 border-l border-[#E5E5EA] pl-2">
+                {dish.tags.map(tag => (
+                  <span key={tag} className="text-[12px] text-[#8E8E93]">#{tag}</span>
+                ))}
+              </div>
+            )}
           </div>
-          <div className="detail-actions">
-            <Link to={`/dish/${dish.id}/edit`} className="btn btn-glass">
-              <Edit className="h-4 w-4" />
-              编辑
-            </Link>
-            <button onClick={handleDelete} disabled={deleting} className="btn btn-danger-soft">
-              <Trash2 className="h-4 w-4" />
-              {deleting ? '删除中...' : '删除'}
-            </button>
+        </div>
+        <div className="grid grid-cols-3 divide-x divide-[#E5E5EA]">
+          <div className="py-3 text-center">
+            <p className="text-[10px] font-bold uppercase text-[#8E8E93]">时长</p>
+            <p className="text-[14px] font-semibold">{dish.cooking_time}m</p>
           </div>
-        </header>
-
-        {dish.tags.length > 0 && (
-          <div className="tag-row">
-            {dish.tags.map((tag) => (
-              <span key={tag} className="tag-pill">
-                {tag}
-              </span>
-            ))}
+          <div className="py-3 text-center">
+            <p className="text-[10px] font-bold uppercase text-[#8E8E93]">份量</p>
+            <p className="text-[14px] font-semibold">{dish.servings}p</p>
           </div>
-        )}
-
+          <div className="py-3 text-center">
+            <p className="text-[10px] font-bold uppercase text-[#8E8E93]">难度</p>
+            <p className="text-[14px] font-semibold">{getDifficultyText(dish.difficulty)}</p>
+          </div>
+        </div>
         {dish.tutorial_url && (
-          <a href={dish.tutorial_url} target="_blank" rel="noopener noreferrer" className="btn btn-glass">
-            <Play className="h-4 w-4" />
-            观看视频教程
-            <ExternalLink className="h-3 w-3" />
+          <a href={dish.tutorial_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 active:bg-slate-50">
+            <div className="flex items-center gap-3">
+              <Play className="h-4 w-4 text-[#007AFF] fill-current" />
+              <span className="text-[15px] font-medium text-[#1C1C1E]">观看视频教程</span>
+            </div>
+            <ChevronRight className="h-4 w-4 text-[#C7C7CC]" />
           </a>
         )}
+      </section>
 
-        <div className="stats-grid three">
-          <article className="stat-card compact">
-            <div className="stat-icon text-sky-600">
-              <Clock className="h-5 w-5" />
+      {/* Ingredients Group */}
+      <section>
+        <h2 className="mb-2 px-1 text-[11px] font-bold uppercase tracking-widest text-[#8E8E93]">所需食材</h2>
+        <div className="ios-grouped-section divide-y divide-[#E5E5EA]">
+          {dish.ingredients.map((item, idx) => (
+            <div key={idx} className="flex items-center gap-3 p-3.5">
+              <div className="h-1.5 w-1.5 rounded-full bg-[#C7C7CC]" />
+              <span className="text-[15px] font-medium text-[#3A3A3C]">{item}</span>
             </div>
-            <div>
-              <p className="stat-label">制作时长</p>
-              <p className="stat-value">{dish.cooking_time} 分钟</p>
-            </div>
-          </article>
-
-          <article className="stat-card compact">
-            <div className="stat-icon text-indigo-600">
-              <Users className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="stat-label">份量</p>
-              <p className="stat-value">{dish.servings} 人份</p>
-            </div>
-          </article>
-
-          <article className="stat-card compact">
-            <div className={`stat-icon ${getDifficultyColor(dish.difficulty)}`}>
-              <Star className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="stat-label">难度</p>
-              <p className={`stat-value ${getDifficultyColor(dish.difficulty)}`}>
-                {getDifficultyText(dish.difficulty)}
-              </p>
-            </div>
-          </article>
+          ))}
         </div>
+      </section>
 
-        <section className="detail-section">
-          <h2>所需食材</h2>
-          <ul className="ingredient-list">
-            {dish.ingredients.map((ingredient, index) => (
-              <li key={`${ingredient}-${index}`}>{ingredient}</li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="detail-section">
-          <h2>制作步骤</h2>
-          <ol className="instruction-list">
-            {dish.instructions.map((instruction, index) => (
-              <li key={index}>
-                <span className="step-index">{index + 1}</span>
-                <p>{instruction}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
-      </div>
-    </section>
+      {/* Instructions Group */}
+      <section>
+        <h2 className="mb-2 px-1 text-[11px] font-bold uppercase tracking-widest text-[#8E8E93]">制作步骤</h2>
+        <div className="ios-grouped-section divide-y divide-[#E5E5EA]">
+          {dish.instructions.map((step, idx) => (
+            <div key={idx} className="flex gap-4 p-4">
+              <span className="text-[15px] font-bold text-[#007AFF] tabular-nums">{idx + 1}.</span>
+              <p className="text-[15px] leading-relaxed text-[#3A3A3C]">{step}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
   );
 };
 

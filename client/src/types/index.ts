@@ -27,6 +27,22 @@ export interface DishFormData {
   tutorial_url?: string;
 }
 
+export interface CookingLog {
+  id: number;
+  dish_id: number;
+  dish_name: string;
+  dish_preview?: string;
+  image_url?: string;
+  notes?: string;
+  cooked_at: string;
+}
+
+export interface CookingLogFormData {
+  dish_id: number;
+  image_url?: string;
+  notes?: string;
+}
+
 export interface AdminStats {
   total_dishes: number;
   total_categories: number;

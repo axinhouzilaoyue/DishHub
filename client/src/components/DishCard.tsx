@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Clock, Users, Star } from 'lucide-react';
+import { Clock, Users, Star, ArrowUpRight } from 'lucide-react';
 import { Dish } from '../types';
-import { getDifficultyText, getDifficultyColor } from '../utils/dish';
+import { getDifficultyText } from '../utils/dish';
 
 interface DishCardProps {
   dish: Dish;
@@ -10,53 +10,46 @@ interface DishCardProps {
 
 const DishCard: React.FC<DishCardProps> = ({ dish }) => {
   return (
-    <Link to={`/dish/${dish.id}`} className="dish-card" aria-label={`查看菜品 ${dish.name}`}>
-      <div className="dish-card-image">
-        <div className="dish-image-wrap">
-          {dish.image ? (
-            <img
-              src={dish.image}
-              alt={dish.name}
-              className="dish-image"
-            />
-          ) : (
-            <div className="dish-image-placeholder">🍽️</div>
-          )}
+    <Link
+      to={`/dish/${dish.id}`}
+      className="paper-card group hover:shadow-paper-deep transition-all duration-500"
+    >
+      <div className="aspect-[4/3] overflow-hidden relative">
+        {dish.image ? (
+          <img src={dish.image} alt={dish.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+        ) : (
+          <div className="h-full w-full bg-paper flex items-center justify-center text-5xl grayscale opacity-40">🍲</div>
+        )}
+        <div className="absolute top-4 left-4">
+          <span className="px-2.5 py-1 rounded-lg bg-white/90 backdrop-blur-md text-[10px] font-black text-sage uppercase tracking-widest shadow-sm">
+            {dish.category}
+          </span>
+        </div>
+        <div className="absolute inset-0 bg-sage/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center text-sage scale-0 group-hover:scale-100 transition-transform duration-500 shadow-xl">
+            <ArrowUpRight className="h-6 w-6" strokeWidth={3} />
+          </div>
         </div>
       </div>
 
-      <div className="dish-card-content">
-        <div className="dish-card-header">
-          <h3>{dish.name}</h3>
-          <span className="dish-category">{dish.category}</span>
-        </div>
-
-        {dish.tags.length > 0 && (
-          <div className="tag-row">
-            {dish.tags.slice(0, 3).map((tag) => (
-              <span key={tag} className="tag-pill">
-                {tag}
-              </span>
-            ))}
-            {dish.tags.length > 3 && <span className="tag-pill muted">+{dish.tags.length - 3}</span>}
+      <div className="p-6">
+        <h3 className="text-[18px] font-black text-ink mb-4 line-clamp-1">{dish.name}</h3>
+        
+        <div className="flex items-center justify-between border-t border-paper pt-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1 text-[11px] font-bold text-ink-light">
+              <Clock className="h-3 w-3" />
+              <span>{dish.cooking_time}m</span>
+            </div>
+            <div className="flex items-center gap-1 text-[11px] font-bold text-ink-light">
+              <Users className="h-3 w-3" />
+              <span>{dish.servings}p</span>
+            </div>
           </div>
-        )}
-
-        <div className="dish-meta">
-          <div className="meta-group">
-            <span>
-              <Clock className="h-4 w-4" />
-              {dish.cooking_time}分钟
-            </span>
-            <span>
-              <Users className="h-4 w-4" />
-              {dish.servings}人份
-            </span>
-          </div>
-          <span className={`difficulty-badge ${getDifficultyColor(dish.difficulty)}`}>
-            <Star className="h-4 w-4" />
+          <div className="flex items-center gap-0.5 text-[11px] font-black text-cinnamon uppercase tracking-tighter">
+            <Star className="h-2.5 w-2.5 fill-current" />
             {getDifficultyText(dish.difficulty)}
-          </span>
+          </div>
         </div>
       </div>
     </Link>

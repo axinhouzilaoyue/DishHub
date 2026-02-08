@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AdminStats, ApiHealth, BackupExportResult, Dish, DishFormData } from '../types';
+import { AdminStats, ApiHealth, BackupExportResult, Dish, DishFormData, CookingLog, CookingLogFormData } from '../types';
 
 const api = axios.create({
   baseURL: '/api',
@@ -39,7 +39,6 @@ const withErrorHandling = async <T>(task: () => Promise<T>): Promise<T> => {
 };
 
 export const dishAPI = {
-  // 获取所有菜品
   getAllDishes: async (params?: {
     category?: string;
     search?: string;
@@ -51,7 +50,6 @@ export const dishAPI = {
     });
   },
 
-  // 获取单个菜品
   getDish: async (id: number): Promise<Dish> => {
     return withErrorHandling(async () => {
       const response = await api.get(`/dishes/${id}`);
@@ -59,7 +57,6 @@ export const dishAPI = {
     });
   },
 
-  // 创建菜品
   createDish: async (data: DishFormData): Promise<{ id: number; message: string }> => {
     return withErrorHandling(async () => {
       const response = await api.post('/dishes', data);
@@ -67,7 +64,6 @@ export const dishAPI = {
     });
   },
 
-  // 更新菜品
   updateDish: async (id: number, data: DishFormData): Promise<{ message: string }> => {
     return withErrorHandling(async () => {
       const response = await api.put(`/dishes/${id}`, data);
@@ -75,7 +71,6 @@ export const dishAPI = {
     });
   },
 
-  // 删除菜品
   deleteDish: async (id: number): Promise<{ message: string }> => {
     return withErrorHandling(async () => {
       const response = await api.delete(`/dishes/${id}`);
@@ -83,10 +78,39 @@ export const dishAPI = {
     });
   },
 
-  // 获取所有分类
   getCategories: async (): Promise<string[]> => {
     return withErrorHandling(async () => {
       const response = await api.get('/dishes/categories');
+      return response.data;
+    });
+  },
+};
+
+export const logAPI = {
+  getAllLogs: async (): Promise<CookingLog[]> => {
+    return withErrorHandling(async () => {
+      const response = await api.get('/logs');
+      return response.data;
+    });
+  },
+
+  createLog: async (data: CookingLogFormData): Promise<{ success: boolean; id: number }> => {
+    return withErrorHandling(async () => {
+      const response = await api.post('/logs', data);
+      return response.data;
+    });
+  },
+
+  updateLog: async (id: number, data: { notes?: string; image_url?: string }): Promise<{ success: boolean }> => {
+    return withErrorHandling(async () => {
+      const response = await api.put('/logs', { ...data, id });
+      return response.data;
+    });
+  },
+
+  deleteLog: async (id: number): Promise<{ success: boolean }> => {
+    return withErrorHandling(async () => {
+      const response = await api.delete('/logs', { params: { id } });
       return response.data;
     });
   },
