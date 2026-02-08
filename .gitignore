@@ -7,9 +7,12 @@ yarn-error.log*
 # 构建产物
 dist/
 build/
+client/.wrangler/
+client/.dev.vars
+client/.env*
 
-# 数据库
-server/data/*.db
+# D1 backups
+backups/
 
 # 环境变量
 .env
@@ -38,6 +41,7 @@ pids
 # 操作系统
 .DS_Store
 .DS_Store?
+Library/
 ._*
 .Spotlight-V100
 .Trashes

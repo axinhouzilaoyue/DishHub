@@ -1,31 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Clock, Users, Star, Edit, Trash2, ArrowLeft, ExternalLink, Play } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import { ArrowLeft, Clock, Edit, ExternalLink, Play, Star, Trash2, Users } from 'lucide-react';
+import LoadingSpinner from '../components/LoadingSpinner';
 import { dishAPI } from '../services/api';
 import { Dish } from '../types';
-import { getDifficultyText, getDifficultyColor } from '../utils/dish';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { getDifficultyColor, getDifficultyText } from '../utils/dish';
 
 const DishDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [dish, setDish] = useState<Dish | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadDish = async () => {
-      if (!id) return;
-      
+      if (!id) {
+        setError('菜品 ID 缺失');
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        const dishData = await dishAPI.getDish(parseInt(id));
-        setDish(dishData);
+        const data = await dishAPI.getDish(parseInt(id, 10));
+        setDish(data);
         setError(null);
       } catch (err) {
-        console.error('加载菜品失败:', err);
-        setError('菜品不存在或加载失败');
+        setError(err instanceof Error ? err.message : '菜品加载失败');
       } finally {
         setLoading(false);
       }
@@ -35,176 +38,151 @@ const DishDetailPage: React.FC = () => {
   }, [id]);
 
   const handleDelete = async () => {
-    if (!dish || !window.confirm('确定要删除这道菜品吗？')) return;
+    if (!dish) {
+      return;
+    }
+
+    const confirmed = window.confirm(`确定删除「${dish.name}」吗？`);
+    if (!confirmed) {
+      return;
+    }
 
     try {
       setDeleting(true);
       await dishAPI.deleteDish(dish.id);
-      navigate('/');
+      navigate('/library');
     } catch (err) {
-      console.error('删除失败:', err);
-      alert('删除失败，请稍后重试');
+      alert(err instanceof Error ? err.message : '删除失败，请稍后重试');
     } finally {
       setDeleting(false);
     }
   };
 
-
   if (loading) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner message="正在加载菜品详情..." />;
   }
 
   if (error || !dish) {
     return (
-      <div className="text-center py-12">
-        <div className="text-red-600 text-lg mb-4">{error}</div>
-        <Link to="/" className="btn btn-primary">
-          返回首页
+      <section className="empty-card">
+        <h2>菜品不可用</h2>
+        <p>{error || '未找到该菜品'}</p>
+        <Link to="/library" className="btn btn-primary">
+          返回菜谱库
         </Link>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* 返回按钮 */}
-      <div className="mb-6">
-        <Link
-          to="/"
-          className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900"
-        >
-          <ArrowLeft className="h-5 w-5" />
-          <span>返回菜单</span>
-        </Link>
-      </div>
+    <section className="panel dish-detail-panel">
+      <Link to="/library" className="text-link inline-flex items-center gap-2">
+        <ArrowLeft className="h-4 w-4" />
+        返回菜谱库
+      </Link>
 
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        {/* 菜品图片 */}
-        <div className="w-full h-64 bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
+      <div className="detail-image-wrap">
+        <div className="detail-image-inner">
           {dish.image ? (
-            <img
-              src={dish.image}
-              alt={dish.name}
-              className="w-full h-full object-cover"
-            />
+            <img src={dish.image} alt={dish.name} className="detail-image" />
           ) : (
-            <div className="text-primary-400 text-6xl">🍽️</div>
+            <div className="dish-image-placeholder">🍽️</div>
           )}
-        </div>
-
-        <div className="p-6">
-          {/* 标题和操作 */}
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{dish.name}</h1>
-              <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-                {dish.category}
-              </span>
-            </div>
-            <div className="flex space-x-2">
-              <Link
-                to={`/edit/${dish.id}`}
-                className="btn btn-secondary flex items-center space-x-1"
-              >
-                <Edit className="h-4 w-4" />
-                <span>编辑</span>
-              </Link>
-              <button
-                onClick={handleDelete}
-                disabled={deleting}
-                className="btn btn-danger flex items-center space-x-1"
-              >
-                <Trash2 className="h-4 w-4" />
-                <span>{deleting ? '删除中...' : '删除'}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* 标签 */}
-          {dish.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-6">
-              {dish.tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-sm"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* 教程链接 */}
-          {dish.tutorial_url && (
-            <div className="mb-6">
-              <a
-                href={dish.tutorial_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center space-x-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors"
-              >
-                <Play className="h-4 w-4" />
-                <span>观看视频教程</span>
-                <ExternalLink className="h-3 w-3" />
-              </a>
-            </div>
-          )}
-
-          {/* 基本信息 */}
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <Clock className="h-6 w-6 text-gray-600 mx-auto mb-2" />
-              <div className="text-lg font-semibold text-gray-900">{dish.cooking_time}</div>
-              <div className="text-sm text-gray-600">分钟</div>
-            </div>
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <Users className="h-6 w-6 text-gray-600 mx-auto mb-2" />
-              <div className="text-lg font-semibold text-gray-900">{dish.servings}</div>
-              <div className="text-sm text-gray-600">人份</div>
-            </div>
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <Star className={`h-6 w-6 mx-auto mb-2 ${getDifficultyColor(dish.difficulty)}`} />
-              <div className={`text-lg font-semibold ${getDifficultyColor(dish.difficulty)}`}>
-                {getDifficultyText(dish.difficulty)}
-              </div>
-              <div className="text-sm text-gray-600">难度</div>
-            </div>
-          </div>
-
-          {/* 食材列表 */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">所需食材</h2>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <ul className="space-y-2">
-                {dish.ingredients.map((ingredient, index) => (
-                  <li key={index} className="flex items-center space-x-2">
-                    <span className="w-2 h-2 bg-primary-500 rounded-full"></span>
-                    <span className="text-gray-700">{ingredient}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* 制作步骤 */}
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">制作步骤</h2>
-            <div className="space-y-4">
-              {dish.instructions.map((instruction, index) => (
-                <div key={index} className="flex space-x-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center text-sm font-semibold">
-                    {index + 1}
-                  </div>
-                  <div className="flex-1 pt-1">
-                    <p className="text-gray-700">{instruction}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
-    </div>
+
+      <div className="detail-content">
+        <header className="detail-header">
+          <div>
+            <h1 className="detail-title">{dish.name}</h1>
+            <span className="dish-category">{dish.category}</span>
+          </div>
+          <div className="detail-actions">
+            <Link to={`/dish/${dish.id}/edit`} className="btn btn-glass">
+              <Edit className="h-4 w-4" />
+              编辑
+            </Link>
+            <button onClick={handleDelete} disabled={deleting} className="btn btn-danger-soft">
+              <Trash2 className="h-4 w-4" />
+              {deleting ? '删除中...' : '删除'}
+            </button>
+          </div>
+        </header>
+
+        {dish.tags.length > 0 && (
+          <div className="tag-row">
+            {dish.tags.map((tag) => (
+              <span key={tag} className="tag-pill">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {dish.tutorial_url && (
+          <a href={dish.tutorial_url} target="_blank" rel="noopener noreferrer" className="btn btn-glass">
+            <Play className="h-4 w-4" />
+            观看视频教程
+            <ExternalLink className="h-3 w-3" />
+          </a>
+        )}
+
+        <div className="stats-grid three">
+          <article className="stat-card compact">
+            <div className="stat-icon text-sky-600">
+              <Clock className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="stat-label">制作时长</p>
+              <p className="stat-value">{dish.cooking_time} 分钟</p>
+            </div>
+          </article>
+
+          <article className="stat-card compact">
+            <div className="stat-icon text-indigo-600">
+              <Users className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="stat-label">份量</p>
+              <p className="stat-value">{dish.servings} 人份</p>
+            </div>
+          </article>
+
+          <article className="stat-card compact">
+            <div className={`stat-icon ${getDifficultyColor(dish.difficulty)}`}>
+              <Star className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="stat-label">难度</p>
+              <p className={`stat-value ${getDifficultyColor(dish.difficulty)}`}>
+                {getDifficultyText(dish.difficulty)}
+              </p>
+            </div>
+          </article>
+        </div>
+
+        <section className="detail-section">
+          <h2>所需食材</h2>
+          <ul className="ingredient-list">
+            {dish.ingredients.map((ingredient, index) => (
+              <li key={`${ingredient}-${index}`}>{ingredient}</li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="detail-section">
+          <h2>制作步骤</h2>
+          <ol className="instruction-list">
+            {dish.instructions.map((instruction, index) => (
+              <li key={index}>
+                <span className="step-index">{index + 1}</span>
+                <p>{instruction}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+      </div>
+    </section>
   );
 };
 

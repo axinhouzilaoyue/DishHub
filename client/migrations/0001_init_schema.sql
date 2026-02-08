@@ -1,0 +1,24 @@
+CREATE TABLE IF NOT EXISTS dishes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  category TEXT DEFAULT '家常菜',
+  difficulty INTEGER DEFAULT 1,
+  cooking_time INTEGER DEFAULT 30,
+  servings INTEGER DEFAULT 2,
+  ingredients TEXT DEFAULT '[]',
+  instructions TEXT DEFAULT '[]',
+  image TEXT DEFAULT '',
+  tags TEXT DEFAULT '[]',
+  tutorial_url TEXT DEFAULT '',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS cooking_log (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  dish_id INTEGER NOT NULL,
+  image_url TEXT,
+  notes TEXT,
+  cooked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE
+);

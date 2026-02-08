@@ -1,0 +1,12 @@
+name = "dishhub"
+compatibility_date = "2026-02-08"
+pages_build_output_dir = "./dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "dishhub-db"
+database_id = "30b78ebc-177b-48f6-9328-eb2d4c52a4c6"
+migrations_dir = "./migrations"
+
+[observability]
+enabled = true

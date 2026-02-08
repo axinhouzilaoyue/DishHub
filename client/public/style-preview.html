@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DishHub Style Preview</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Arial, sans-serif;
+        background: #eef1f5;
+        color: #0f172a;
+      }
+      .wrap {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 28px 18px 48px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 28px;
+        letter-spacing: -0.02em;
+      }
+      .subtitle {
+        margin: 10px 0 0;
+        color: #475569;
+      }
+      .tips {
+        margin-top: 14px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(15, 23, 42, 0.1);
+        background: rgba(255, 255, 255, 0.72);
+        color: #334155;
+        font-size: 14px;
+      }
+      .grid {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+        gap: 14px;
+      }
+      @media (min-width: 1180px) {
+        .grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+      .theme {
+        border-radius: 22px;
+        overflow: hidden;
+        border: 1px solid rgba(15, 23, 42, 0.1);
+        box-shadow: 0 22px 35px -28px rgba(15, 23, 42, 0.35);
+        min-height: 640px;
+      }
+      .theme-head {
+        padding: 16px;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      }
+      .theme-head h2 {
+        margin: 0;
+        font-size: 18px;
+      }
+      .theme-head p {
+        margin: 6px 0 0;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .preview {
+        padding: 14px;
+        display: grid;
+        gap: 10px;
+      }
+      .hero {
+        border-radius: 16px;
+        padding: 14px;
+      }
+      .hero h3 {
+        margin: 0;
+        font-size: 20px;
+      }
+      .hero p {
+        margin: 7px 0 0;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .card {
+        border-radius: 14px;
+        padding: 11px;
+        min-height: 72px;
+      }
+      .label {
+        margin: 0;
+        font-size: 12px;
+        opacity: 0.8;
+      }
+      .value {
+        margin: 6px 0 0;
+        font-size: 18px;
+        font-weight: 700;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+      }
+      .btn {
+        border: 1px solid transparent;
+        border-radius: 11px;
+        min-height: 36px;
+        padding: 0 12px;
+        font-size: 13px;
+        font-weight: 620;
+        cursor: default;
+      }
+      .list {
+        border-radius: 14px;
+        padding: 10px;
+      }
+      .item {
+        border-radius: 10px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 10px;
+        font-size: 13px;
+      }
+
+      /* A: Quiet Luxury */
+      .a { background: #f5f7fb; }
+      .a .theme-head { background: #ffffff; }
+      .a .theme-head p { color: #64748b; }
+      .a .hero {
+        background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(248,250,252,.92));
+        border: 1px solid rgba(15, 23, 42, 0.08);
+      }
+      .a .hero p { color: #475569; }
+      .a .card, .a .list, .a .item {
+        background: #ffffff;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+      }
+      .a .btn.main {
+        color: #fff;
+        background: linear-gradient(145deg, #2563eb, #1d4ed8);
+      }
+      .a .btn.ghost {
+        color: #1f2937;
+        background: #fff;
+        border-color: rgba(15,23,42,.12);
+      }
+
+      /* B: Graphite Pro */
+      .b { background: #0f131a; color: #e5e7eb; }
+      .b .theme-head {
+        background: #131a23;
+        border-color: rgba(255,255,255,.06);
+      }
+      .b .theme-head p { color: #9ca3af; }
+      .b .hero {
+        background: linear-gradient(145deg, #151d28, #111722);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+      }
+      .b .hero p { color: #cbd5e1; }
+      .b .card, .b .list {
+        background: #131a24;
+        border: 1px solid rgba(148,163,184,.2);
+      }
+      .b .item {
+        background: #0f1520;
+        border: 1px solid rgba(148,163,184,.18);
+      }
+      .b .btn.main {
+        color: #dbeafe;
+        background: linear-gradient(145deg, #1d4ed8, #1e40af);
+      }
+      .b .btn.ghost {
+        color: #e5e7eb;
+        background: #0f1520;
+        border-color: rgba(148,163,184,.28);
+      }
+
+      /* C: Soft Editorial */
+      .c { background: #f7f4ef; }
+      .c .theme-head { background: #fcfaf7; }
+      .c .theme-head p { color: #78716c; }
+      .c .hero {
+        background: linear-gradient(145deg, #fffdf8, #f9f5ee);
+        border: 1px solid rgba(120, 113, 108, 0.2);
+      }
+      .c .hero p { color: #57534e; }
+      .c .card, .c .list, .c .item {
+        background: #fffdf8;
+        border: 1px solid rgba(120, 113, 108, 0.18);
+      }
+      .c .btn.main {
+        color: #fff;
+        background: linear-gradient(145deg, #0f766e, #0f766e);
+      }
+      .c .btn.ghost {
+        color: #374151;
+        background: #fffdf8;
+        border-color: rgba(120,113,108,.28);
+      }
+
+      .choose {
+        margin-top: 16px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px dashed rgba(15, 23, 42, 0.2);
+        background: rgba(255,255,255,.75);
+        font-weight: 600;
+      }
+      code { background: rgba(15,23,42,.07); padding: 1px 6px; border-radius: 6px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>DishHub 视觉风格预览（仅预览，不影响现网）</h1>
+      <p class="subtitle">同一信息结构下的三种风格，重点看：层级、按钮、密度、观感耐久度。</p>
+      <div class="tips">你确认后我会把选中风格应用到真实页面（控制台、菜谱库、详情、编辑、设置）并统一细节。</div>
+
+      <section class="grid">
+        <article class="theme a">
+          <div class="theme-head">
+            <h2>A · Quiet Luxury（静奢浅色）</h2>
+            <p>最克制、最耐看，适合长期使用。</p>
+          </div>
+          <div class="preview">
+            <div class="hero">
+              <h3>DishHub 控制台</h3>
+              <p>精简、克制、聚焦内容。按钮只保留必要操作。</p>
+            </div>
+            <div class="row">
+              <div class="card"><p class="label">总菜品</p><p class="value">9</p></div>
+              <div class="card"><p class="label">分类</p><p class="value">2</p></div>
+            </div>
+            <div class="actions"><button class="btn main">新增菜品</button><button class="btn ghost">导出备份</button></div>
+            <div class="list">
+              <div class="item"><span>苹果炖猪排</span><span>30 min</span></div>
+              <div class="item"><span>炒方便面</span><span>20 min</span></div>
+              <div class="item"><span>白灼虾</span><span>15 min</span></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="theme b">
+          <div class="theme-head">
+            <h2>B · Graphite Pro（深空极简）</h2>
+            <p>深色专业感强，晚上看很高级。</p>
+          </div>
+          <div class="preview">
+            <div class="hero">
+              <h3>DishHub 控制台</h3>
+              <p>暗色层级分明，信息强调更锐利。</p>
+            </div>
+            <div class="row">
+              <div class="card"><p class="label">总菜品</p><p class="value">9</p></div>
+              <div class="card"><p class="label">分类</p><p class="value">2</p></div>
+            </div>
+            <div class="actions"><button class="btn main">新增菜品</button><button class="btn ghost">导出备份</button></div>
+            <div class="list">
+              <div class="item"><span>苹果炖猪排</span><span>30 min</span></div>
+              <div class="item"><span>炒方便面</span><span>20 min</span></div>
+              <div class="item"><span>白灼虾</span><span>15 min</span></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="theme c">
+          <div class="theme-head">
+            <h2>C · Soft Editorial（暖白杂志）</h2>
+            <p>更生活方式、更温润。</p>
+          </div>
+          <div class="preview">
+            <div class="hero">
+              <h3>DishHub 控制台</h3>
+              <p>排版与留白优先，情绪更柔和。</p>
+            </div>
+            <div class="row">
+              <div class="card"><p class="label">总菜品</p><p class="value">9</p></div>
+              <div class="card"><p class="label">分类</p><p class="value">2</p></div>
+            </div>
+            <div class="actions"><button class="btn main">新增菜品</button><button class="btn ghost">导出备份</button></div>
+            <div class="list">
+              <div class="item"><span>苹果炖猪排</span><span>30 min</span></div>
+              <div class="item"><span>炒方便面</span><span>20 min</span></div>
+              <div class="item"><span>白灼虾</span><span>15 min</span></div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <div class="choose">选好后直接告诉我：<code>A</code> / <code>B</code> / <code>C</code>，我就按这个风格改全站。</div>
+    </div>
+  </body>
+</html>

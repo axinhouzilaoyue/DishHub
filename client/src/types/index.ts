@@ -26,3 +26,22 @@ export interface DishFormData {
   tags: string[];
   tutorial_url?: string;
 }
+
+export interface AdminStats {
+  total_dishes: number;
+  total_categories: number;
+  total_logs: number;
+  last_updated: string | null;
+}
+
+export interface BackupExportResult {
+  blob: Blob;
+  filename: string;
+}
+
+export interface ApiHealth {
+  status: string;
+  service?: string;
+  runtime?: string;
+  timestamp?: string;
+}

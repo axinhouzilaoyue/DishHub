@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useParams, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
-import HomePage from './pages/HomePage';
+import DashboardPage from './pages/DashboardPage';
 import DishDetailPage from './pages/DishDetailPage';
 import DishForm from './components/DishForm';
 import LoadingSpinner from './components/LoadingSpinner';
 import { dishAPI } from './services/api';
 import { Dish } from './types';
+import LibraryPage from './pages/LibraryPage';
+import SettingsPage from './pages/SettingsPage';
 
 // 编辑页面组件
 const EditFormPage: React.FC = () => {
@@ -23,6 +25,7 @@ const EditFormPage: React.FC = () => {
         setDish(dishData);
       } catch (err) {
         console.error('加载菜品失败:', err);
+        setDish(null);
       } finally {
         setLoading(false);
       }
@@ -32,7 +35,7 @@ const EditFormPage: React.FC = () => {
   }, [id]);
 
   if (loading) return <LoadingSpinner />;
-  if (!dish) return <Navigate to="/" replace />;
+  if (!dish) return <Navigate to="/library" replace />;
 
   return <DishForm dish={dish} isEditing />;
 };
@@ -41,10 +44,13 @@ function App() {
   return (
     <Layout>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<DashboardPage />} />
+        <Route path="/library" element={<LibraryPage />} />
         <Route path="/dish/:id" element={<DishDetailPage />} />
-        <Route path="/add" element={<DishForm />} />
-        <Route path="/edit/:id" element={<EditFormPage />} />
+        <Route path="/dish/new" element={<DishForm />} />
+        <Route path="/dish/:id/edit" element={<EditFormPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>
   );

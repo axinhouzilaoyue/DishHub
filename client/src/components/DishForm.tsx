@@ -1,21 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Minus, Save, X, ExternalLink } from 'lucide-react';
+import { ExternalLink, Minus, Plus, Save, X } from 'lucide-react';
+import { Dish, DishFormData } from '../types';
 import { dishAPI } from '../services/api';
-import { DishFormData, Dish } from '../types';
 import { formatTags } from '../utils/dish';
+import { useDishCategories } from '../hooks/useDishCategories';
 
 interface DishFormProps {
   dish?: Dish;
   isEditing?: boolean;
 }
 
+const DEFAULT_CATEGORY = '家常菜';
+
 const DishForm: React.FC<DishFormProps> = ({ dish, isEditing = false }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { categories } = useDishCategories();
   const [formData, setFormData] = useState<DishFormData>({
     name: '',
-    category: '家常菜',
+    category: DEFAULT_CATEGORY,
     difficulty: 1,
     cooking_time: 30,
     servings: 2,
@@ -26,75 +30,96 @@ const DishForm: React.FC<DishFormProps> = ({ dish, isEditing = false }) => {
     tutorial_url: '',
   });
 
-  // 如果是编辑模式，填充表单数据
   useEffect(() => {
-    if (dish) {
-      setFormData({
-        name: dish.name,
-        category: dish.category,
-        difficulty: dish.difficulty,
-        cooking_time: dish.cooking_time,
-        servings: dish.servings,
-        ingredients: dish.ingredients.length > 0 ? dish.ingredients : [''],
-        instructions: dish.instructions.length > 0 ? dish.instructions : [''],
-        image: dish.image || '',
-        tags: dish.tags,
-        tutorial_url: dish.tutorial_url || '',
-      });
+    if (!dish) {
+      return;
     }
+
+    setFormData({
+      name: dish.name,
+      category: dish.category,
+      difficulty: dish.difficulty,
+      cooking_time: dish.cooking_time,
+      servings: dish.servings,
+      ingredients: dish.ingredients.length > 0 ? dish.ingredients : [''],
+      instructions: dish.instructions.length > 0 ? dish.instructions : [''],
+      image: dish.image || '',
+      tags: dish.tags,
+      tutorial_url: dish.tutorial_url || '',
+    });
   }, [dish]);
 
-  // 处理基本字段变化
-  const handleInputChange = (field: keyof DishFormData, value: any) => {
-    setFormData(prev => ({
+  const categoryOptions = useMemo(() => {
+    const fallback = [
+      DEFAULT_CATEGORY,
+      '川菜',
+      '粤菜',
+      '湘菜',
+      '鲁菜',
+      '苏菜',
+      '浙菜',
+      '徽菜',
+      '闽菜',
+      '西餐',
+      '日料',
+      '韩料',
+      '其他',
+    ];
+
+    const merged = categories.length > 0 ? [...categories] : fallback;
+    if (!merged.includes(formData.category)) {
+      merged.unshift(formData.category);
+    }
+
+    return Array.from(new Set(merged));
+  }, [categories, formData.category]);
+
+  const handleInputChange = (field: keyof DishFormData, value: unknown) => {
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
-  // 处理数组字段变化
   const handleArrayChange = (field: 'ingredients' | 'instructions', index: number, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: prev[field].map((item, i) => (i === index ? value : item)),
+      [field]: prev[field].map((item, itemIndex) => (itemIndex === index ? value : item)),
     }));
   };
 
-  // 添加数组项
   const addArrayItem = (field: 'ingredients' | 'instructions') => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: [...prev[field], ''],
     }));
   };
 
-  // 删除数组项
   const removeArrayItem = (field: 'ingredients' | 'instructions', index: number) => {
-    if (formData[field].length <= 1) return;
-    setFormData(prev => ({
+    if (formData[field].length <= 1) {
+      return;
+    }
+
+    setFormData((prev) => ({
       ...prev,
-      [field]: prev[field].filter((_, i) => i !== index),
+      [field]: prev[field].filter((_, itemIndex) => itemIndex !== index),
     }));
   };
 
-  // 处理标签
-  const handleTagsChange = (tagsString: string) => {
-    const tags = formatTags(tagsString);
-    handleInputChange('tags', tags);
+  const handleTagsChange = (value: string) => {
+    handleInputChange('tags', formatTags(value));
   };
 
-  // 表单提交
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
 
-    // 验证表单
     if (!formData.name.trim()) {
       alert('请输入菜品名称');
       return;
     }
 
-    const validIngredients = formData.ingredients.filter(item => item.trim());
-    const validInstructions = formData.instructions.filter(item => item.trim());
+    const validIngredients = formData.ingredients.map((item) => item.trim()).filter(Boolean);
+    const validInstructions = formData.instructions.map((item) => item.trim()).filter(Boolean);
 
     if (validIngredients.length === 0) {
       alert('请至少添加一个食材');
@@ -108,76 +133,74 @@ const DishForm: React.FC<DishFormProps> = ({ dish, isEditing = false }) => {
 
     try {
       setLoading(true);
-      const submitData = {
+      const payload: DishFormData = {
         ...formData,
         ingredients: validIngredients,
         instructions: validInstructions,
       };
 
       if (isEditing && dish) {
-        await dishAPI.updateDish(dish.id, submitData);
+        await dishAPI.updateDish(dish.id, payload);
         navigate(`/dish/${dish.id}`);
-      } else {
-        const result = await dishAPI.createDish(submitData);
-        navigate(`/dish/${result.id}`);
+        return;
       }
+
+      const created = await dishAPI.createDish(payload);
+      navigate(`/dish/${created.id}`);
     } catch (err) {
-      console.error('保存失败:', err);
-      alert('保存失败，请稍后重试');
+      alert(err instanceof Error ? err.message : '保存失败，请稍后重试');
     } finally {
       setLoading(false);
     }
   };
 
-  const categories = ['家常菜', '川菜', '粤菜', '湘菜', '鲁菜', '苏菜', '浙菜', '徽菜', '闽菜', '西餐', '日料', '韩料', '其他'];
-
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">
-          {isEditing ? '编辑菜品' : '添加新菜品'}
-        </h1>
+    <div className="panel panel-form">
+      <div className="panel-header">
+        <div>
+          <p className="eyebrow">菜品编辑</p>
+          <h1>{isEditing ? '编辑菜品' : '添加新菜品'}</h1>
+        </div>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* 基本信息 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                菜品名称 *
-              </label>
+      <form onSubmit={handleSubmit} className="form-grid">
+        <section className="form-section">
+          <h2 className="section-title">基础信息</h2>
+
+          <div className="field-grid">
+            <label className="field-wrap">
+              <span>菜品名称 *</span>
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                className="input"
+                onChange={(event) => handleInputChange('name', event.target.value)}
+                className="field-input"
                 placeholder="请输入菜品名称"
                 required
               />
-            </div>
+            </label>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                分类
-              </label>
+            <label className="field-wrap">
+              <span>分类</span>
               <select
                 value={formData.category}
-                onChange={(e) => handleInputChange('category', e.target.value)}
-                className="input"
+                onChange={(event) => handleInputChange('category', event.target.value)}
+                className="field-input"
               >
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
+                {categoryOptions.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
                 ))}
               </select>
-            </div>
+            </label>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                难度等级
-              </label>
+            <label className="field-wrap">
+              <span>难度等级</span>
               <select
                 value={formData.difficulty}
-                onChange={(e) => handleInputChange('difficulty', parseInt(e.target.value))}
-                className="input"
+                onChange={(event) => handleInputChange('difficulty', parseInt(event.target.value, 10))}
+                className="field-input"
               >
                 <option value={1}>简单</option>
                 <option value={2}>一般</option>
@@ -185,59 +208,56 @@ const DishForm: React.FC<DishFormProps> = ({ dish, isEditing = false }) => {
                 <option value={4}>困难</option>
                 <option value={5}>大师</option>
               </select>
-            </div>
+            </label>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                制作时间（分钟）
-              </label>
+            <label className="field-wrap">
+              <span>制作时间（分钟）</span>
               <input
                 type="number"
                 value={formData.cooking_time}
-                onChange={(e) => handleInputChange('cooking_time', parseInt(e.target.value) || 0)}
-                className="input"
+                onChange={(event) =>
+                  handleInputChange('cooking_time', parseInt(event.target.value, 10) || 1)
+                }
+                className="field-input"
                 min="1"
                 max="1440"
               />
-            </div>
+            </label>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                份量（人份）
-              </label>
+            <label className="field-wrap">
+              <span>份量（人份）</span>
               <input
                 type="number"
                 value={formData.servings}
-                onChange={(e) => handleInputChange('servings', parseInt(e.target.value) || 1)}
-                className="input"
+                onChange={(event) => handleInputChange('servings', parseInt(event.target.value, 10) || 1)}
+                className="field-input"
                 min="1"
-                max="20"
+                max="50"
               />
-            </div>
+            </label>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                图片URL（可选）
-              </label>
+            <label className="field-wrap">
+              <span>图片 URL（可选）</span>
               <input
                 type="url"
                 value={formData.image}
-                onChange={(e) => handleInputChange('image', e.target.value)}
-                className="input"
+                onChange={(event) => handleInputChange('image', event.target.value)}
+                className="field-input"
                 placeholder="https://..."
               />
-            </div>
+            </label>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="field-wrap field-span-2">
+              <label className="field-label" htmlFor="tutorialUrl">
                 教程链接（可选）
               </label>
-              <div className="relative">
+              <div className="tutorial-input-wrap">
                 <input
+                  id="tutorialUrl"
                   type="url"
                   value={formData.tutorial_url}
-                  onChange={(e) => handleInputChange('tutorial_url', e.target.value)}
-                  className="input pr-10"
+                  onChange={(event) => handleInputChange('tutorial_url', event.target.value)}
+                  className="field-input"
                   placeholder="https://www.bilibili.com/video/..."
                 />
                 {formData.tutorial_url && (
@@ -245,129 +265,106 @@ const DishForm: React.FC<DishFormProps> = ({ dish, isEditing = false }) => {
                     href={formData.tutorial_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary-500 hover:text-primary-600"
+                    className="tutorial-link"
                     title="在新窗口打开教程"
                   >
                     <ExternalLink className="h-4 w-4" />
                   </a>
                 )}
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                可以添加B站、YouTube等视频教程链接
-              </p>
+              <p className="hint-text">支持 B 站、YouTube 等视频教程链接。</p>
             </div>
           </div>
+        </section>
 
-          {/* 标签 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              标签（用逗号分隔）
-            </label>
+        <section className="form-section">
+          <h2 className="section-title">标签与食材</h2>
+
+          <label className="field-wrap">
+            <span>标签（用逗号分隔）</span>
             <input
               type="text"
               value={formData.tags.join(', ')}
-              onChange={(e) => handleTagsChange(e.target.value)}
-              className="input"
-              placeholder="例如：辣, 下饭, 简单"
+              onChange={(event) => handleTagsChange(event.target.value)}
+              className="field-input"
+              placeholder="例如：辣、下饭、简单"
             />
-          </div>
+          </label>
 
-          {/* 食材列表 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              所需食材 *
-            </label>
-            <div className="space-y-2">
+            <label className="field-label">所需食材 *</label>
+            <div className="list-editor">
               {formData.ingredients.map((ingredient, index) => (
-                <div key={index} className="flex items-center space-x-2">
+                <div key={index} className="list-row">
                   <input
                     type="text"
                     value={ingredient}
-                    onChange={(e) => handleArrayChange('ingredients', index, e.target.value)}
-                    className="input flex-1"
+                    onChange={(event) => handleArrayChange('ingredients', index, event.target.value)}
+                    className="field-input"
                     placeholder={`食材 ${index + 1}`}
                   />
                   <button
                     type="button"
                     onClick={() => removeArrayItem('ingredients', index)}
                     disabled={formData.ingredients.length <= 1}
-                    className="p-2 text-red-500 hover:text-red-700 disabled:text-gray-400"
+                    className="icon-action danger"
                   >
                     <Minus className="h-4 w-4" />
                   </button>
                 </div>
               ))}
-              <button
-                type="button"
-                onClick={() => addArrayItem('ingredients')}
-                className="flex items-center space-x-1 text-primary-600 hover:text-primary-700"
-              >
+
+              <button type="button" onClick={() => addArrayItem('ingredients')} className="ghost-action">
                 <Plus className="h-4 w-4" />
-                <span>添加食材</span>
+                添加食材
               </button>
             </div>
           </div>
+        </section>
 
-          {/* 制作步骤 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              制作步骤 *
-            </label>
-            <div className="space-y-2">
-              {formData.instructions.map((instruction, index) => (
-                <div key={index} className="flex items-start space-x-2">
-                  <div className="flex-shrink-0 w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center text-sm font-semibold mt-1">
-                    {index + 1}
-                  </div>
-                  <textarea
-                    value={instruction}
-                    onChange={(e) => handleArrayChange('instructions', index, e.target.value)}
-                    className="textarea flex-1"
-                    rows={2}
-                    placeholder={`步骤 ${index + 1}`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeArrayItem('instructions', index)}
-                    disabled={formData.instructions.length <= 1}
-                    className="p-2 text-red-500 hover:text-red-700 disabled:text-gray-400 mt-1"
-                  >
-                    <Minus className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={() => addArrayItem('instructions')}
-                className="flex items-center space-x-1 text-primary-600 hover:text-primary-700"
-              >
-                <Plus className="h-4 w-4" />
-                <span>添加步骤</span>
-              </button>
-            </div>
-          </div>
+        <section className="form-section">
+          <h2 className="section-title">制作步骤</h2>
 
-          {/* 操作按钮 */}
-          <div className="flex justify-end space-x-4 pt-6 border-t">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="btn btn-secondary flex items-center space-x-1"
-            >
-              <X className="h-4 w-4" />
-              <span>取消</span>
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn btn-primary flex items-center space-x-1"
-            >
-              <Save className="h-4 w-4" />
-              <span>{loading ? '保存中...' : '保存'}</span>
+          <div className="list-editor">
+            {formData.instructions.map((instruction, index) => (
+              <div key={index} className="step-row">
+                <span className="step-index">{index + 1}</span>
+                <textarea
+                  value={instruction}
+                  onChange={(event) => handleArrayChange('instructions', index, event.target.value)}
+                  className="field-input field-textarea"
+                  rows={2}
+                  placeholder={`步骤 ${index + 1}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeArrayItem('instructions', index)}
+                  disabled={formData.instructions.length <= 1}
+                  className="icon-action danger"
+                >
+                  <Minus className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+
+            <button type="button" onClick={() => addArrayItem('instructions')} className="ghost-action">
+              <Plus className="h-4 w-4" />
+              添加步骤
             </button>
           </div>
-        </form>
-      </div>
+        </section>
+
+        <div className="form-actions">
+          <button type="button" onClick={() => navigate(-1)} className="btn btn-glass">
+            <X className="h-4 w-4" />
+            取消
+          </button>
+          <button type="submit" disabled={loading} className="btn btn-primary">
+            <Save className="h-4 w-4" />
+            {loading ? '保存中...' : '保存菜品'}
+          </button>
+        </div>
+      </form>
     </div>
   );
 };
