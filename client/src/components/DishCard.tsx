@@ -14,7 +14,7 @@ const DishCard: React.FC<DishCardProps> = ({ dish }) => {
       to={`/dish/${dish.id}`}
       className="paper-card group hover:shadow-paper-deep transition-all duration-500"
     >
-      <div className="aspect-[4/3] overflow-hidden relative">
+      <div className="aspect-[16/10] overflow-hidden relative">
         {dish.image ? (
           <img src={dish.image} alt={dish.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
         ) : (
@@ -32,21 +32,21 @@ const DishCard: React.FC<DishCardProps> = ({ dish }) => {
         </div>
       </div>
 
-      <div className="p-6">
-        <h3 className="text-[18px] font-black text-ink mb-4 line-clamp-1">{dish.name}</h3>
-        
-        <div className="flex items-center justify-between border-t border-paper pt-4">
+      <div className="p-5">
+        <h3 className="text-[19px] font-black text-ink mb-3 line-clamp-1">{dish.name}</h3>
+
+        <div className="flex items-center justify-between border-t border-paper pt-3">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1 text-[11px] font-bold text-ink-light">
+            <div className="flex items-center gap-1 text-[12px] font-bold text-ink-light">
               <Clock className="h-3 w-3" />
               <span>{dish.cooking_time}m</span>
             </div>
-            <div className="flex items-center gap-1 text-[11px] font-bold text-ink-light">
+            <div className="flex items-center gap-1 text-[12px] font-bold text-ink-light">
               <Users className="h-3 w-3" />
               <span>{dish.servings}p</span>
             </div>
           </div>
-          <div className="flex items-center gap-0.5 text-[11px] font-black text-cinnamon uppercase tracking-tighter">
+          <div className="flex items-center gap-0.5 text-[12px] font-black text-cinnamon uppercase tracking-tighter">
             <Star className="h-2.5 w-2.5 fill-current" />
             {getDifficultyText(dish.difficulty)}
           </div>

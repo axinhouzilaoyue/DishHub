@@ -87,9 +87,9 @@ export const dishAPI = {
 };
 
 export const logAPI = {
-  getAllLogs: async (): Promise<CookingLog[]> => {
+  getAllLogs: async (params?: { dish_id?: number }): Promise<CookingLog[]> => {
     return withErrorHandling(async () => {
-      const response = await api.get('/logs');
+      const response = await api.get('/logs', { params });
       return response.data;
     });
   },

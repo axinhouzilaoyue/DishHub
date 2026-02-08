@@ -35,6 +35,29 @@ export async function onRequest(context) {
   const pathLogId = getPathLogId(url.pathname);
 
   if (request.method === 'GET') {
+    const rawDishId = url.searchParams.get('dish_id');
+
+    if (rawDishId !== null) {
+      const dishId = parseLogId(rawDishId);
+
+      if (!dishId) {
+        return json({ error: 'Missing or invalid dish_id' }, 400);
+      }
+
+      const { results } = await db.prepare(`
+        SELECT
+          cl.*,
+          d.name as dish_name,
+          d.image as dish_preview
+        FROM cooking_log cl
+        JOIN dishes d ON cl.dish_id = d.id
+        WHERE cl.dish_id = ?
+        ORDER BY cl.cooked_at DESC
+      `).bind(dishId).all();
+
+      return json(results);
+    }
+
     const { results } = await db.prepare(`
       SELECT
         cl.*,

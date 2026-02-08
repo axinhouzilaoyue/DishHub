@@ -25,11 +25,11 @@ const LibraryPage: React.FC = () => {
   }, [isComposing, searchInput]);
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-10">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-1">
         <div>
-          <h1 className="text-[32px] font-black text-ink">美食档案 · <span className="text-sage">Gallery</span></h1>
-          <p className="text-[14px] font-bold text-ink-light mt-1">目前共有 {dishes.length} 道佳肴已归档</p>
+          <h1 className="text-[34px] font-black text-ink">美食档案 · <span className="text-sage">Gallery</span></h1>
+          <p className="text-[15px] font-bold text-ink-light mt-1">目前共有 {dishes.length} 道佳肴已归档</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 min-w-[300px]">
@@ -37,7 +37,7 @@ const LibraryPage: React.FC = () => {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-light group-focus-within:text-sage transition-colors" />
             <input
               type="text"
-              className="w-full h-11 pl-11 pr-4 rounded-xl bg-paper border border-transparent focus:bg-white focus:border-sage/20 focus:ring-4 focus:ring-sage/5 outline-none text-[14px] font-bold transition-all"
+              className="w-full h-11 pl-11 pr-4 rounded-xl bg-paper border border-transparent focus:bg-white focus:border-sage/20 focus:ring-4 focus:ring-sage/5 outline-none text-[15px] font-bold transition-all"
               placeholder="寻找美味..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -47,7 +47,7 @@ const LibraryPage: React.FC = () => {
           </div>
           <div className="relative">
             <select
-              className="appearance-none h-11 pl-4 pr-10 rounded-xl bg-paper text-[13px] font-black text-ink outline-none cursor-pointer hover:bg-paper-stone transition-colors"
+              className="appearance-none h-11 pl-4 pr-10 rounded-xl bg-paper text-[14px] font-black text-ink outline-none cursor-pointer hover:bg-paper-stone transition-colors"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
             >
@@ -77,7 +77,7 @@ const LibraryPage: React.FC = () => {
           <p className="text-[20px] font-black">尚未发现匹配的档案</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {dishes.map((dish) => (
             <DishCard key={dish.id} dish={dish} />
           ))}

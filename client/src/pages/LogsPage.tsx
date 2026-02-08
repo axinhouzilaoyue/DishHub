@@ -84,6 +84,14 @@ const LogsPage: React.FC = () => {
     }
   };
 
+  const formatDateYmd = (value: string) => {
+    const date = new Date(value);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   if (loading && logs.length === 0) return null;
 
   return (
@@ -124,7 +132,7 @@ const LogsPage: React.FC = () => {
               <div className="flex flex-col md:flex-row gap-6">
                 <div className="md:w-32 shrink-0 md:pt-2">
                   <span className="text-[12px] font-black text-sage uppercase tracking-widest bg-sage/10 px-2 py-1 rounded md:bg-transparent md:p-0">
-                    {new Date(log.cooked_at).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
+                    {formatDateYmd(log.cooked_at)}
                   </span>
                 </div>
 
