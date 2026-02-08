@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ChefHat, LayoutGrid, Library, Settings2, Plus } from 'lucide-react';
+import { ChefHat, LayoutGrid, Library, History, ListChecks, Plus } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -12,62 +12,111 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navItems = [
     { to: '/', label: '首页', icon: LayoutGrid },
     { to: '/library', label: '菜谱库', icon: Library },
-    { to: '/settings', label: '设置', icon: Settings2 },
+    { to: '/logs', label: '累计下厨', icon: History },
+    { to: '/order', label: '点菜', icon: ListChecks },
   ];
 
+  const isActiveRoute = (to: string) => {
+    if (to === '/') {
+      return location.pathname === '/';
+    }
+
+    return location.pathname.startsWith(to);
+  };
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="paper-header">
-        <div className="max-w-[1200px] mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="h-9 w-9 rounded-xl bg-sage flex items-center justify-center text-white shadow-paper">
-              <ChefHat className="h-5 w-5" />
-            </div>
-            <span className="text-[18px] font-black tracking-tightest text-ink">DishHub</span>
+    <div className="min-h-screen bg-paper-light md:grid md:grid-cols-[240px_1fr]">
+      <aside className="hidden md:flex flex-col border-r border-paper bg-paper-light/90 backdrop-blur-xl">
+        <div className="px-5 pt-6 pb-4 flex items-center gap-3">
+          <Link
+            to="/settings"
+            className="h-10 w-10 rounded-xl bg-sage text-white shadow-paper inline-flex items-center justify-center"
+            title="设置"
+          >
+            <ChefHat className="h-5 w-5" />
           </Link>
+          <Link to="/" className="text-[19px] font-black tracking-tightest text-ink">DishHub</Link>
+        </div>
 
-          <nav className="hidden md:flex items-center gap-8">
-            {navItems.map((item) => {
-              const isActive = item.to === '/' 
-                ? location.pathname === '/' 
-                : location.pathname.startsWith(item.to);
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={`text-[14px] font-bold transition-all ${
-                    isActive ? 'text-sage scale-105' : 'text-ink-light hover:text-sage'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
+        <nav className="px-4 space-y-1.5">
+          {navItems.map((item) => {
+            const isActive = isActiveRoute(item.to);
 
-          <Link to="/dish/new" className="paper-button !px-4 !py-2 text-[13px]">
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={`group flex items-center gap-3 rounded-xl border px-3 py-2.5 text-[14px] font-black transition-all ${
+                  isActive
+                    ? 'border-paper-stone bg-white text-ink shadow-paper'
+                    : 'border-transparent text-ink-light hover:border-paper hover:bg-white/70 hover:text-ink'
+                }`}
+              >
+                <item.icon
+                  className={`h-4 w-4 transition-colors ${isActive ? 'text-sage' : 'text-ink-light group-hover:text-sage'}`}
+                  strokeWidth={2.4}
+                />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="mt-auto p-4 pb-6">
+          <Link to="/dish/new" className="paper-button w-full !rounded-xl !px-4 !py-2.5 text-[13px]">
             <Plus className="h-4 w-4" strokeWidth={3} />
             新增菜品
           </Link>
         </div>
-      </header>
+      </aside>
 
-      <main className="flex-1 w-full max-w-[1200px] mx-auto p-6 md:p-10 animate-in fade-in duration-700">
-        {children}
-      </main>
+      <div className="min-h-screen flex flex-col">
+        <header className="md:hidden paper-header">
+          <div className="px-5 py-3.5 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <Link
+                to="/settings"
+                className="h-9 w-9 rounded-xl bg-sage text-white shadow-paper inline-flex items-center justify-center"
+                title="设置"
+              >
+                <ChefHat className="h-5 w-5" />
+              </Link>
+              <Link to="/" className="text-[18px] font-black tracking-tightest text-ink">DishHub</Link>
+            </div>
 
-      <footer className="py-12 border-t border-paper text-center">
-        <p className="text-[11px] font-bold text-ink-light/40 uppercase tracking-[0.2em]">
-          Handcrafted by Chef axin · 2026
-        </p>
-      </footer>
+            <Link to="/dish/new" className="paper-button !px-4 !py-2 text-[12px]">
+              <Plus className="h-4 w-4" strokeWidth={3} />
+              新增菜品
+            </Link>
+          </div>
+        </header>
 
-      <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-sage/90 backdrop-blur-xl px-6 py-3 rounded-full flex items-center gap-10 shadow-paper-deep text-white border border-white/10">
-        {navItems.map((item) => (
-          <Link key={item.to} to={item.to} className="opacity-70 hover:opacity-100 transition-opacity">
-            <item.icon className="h-5.5 w-5.5" strokeWidth={2.5} />
-          </Link>
-        ))}
+        <main className="flex-1 w-full max-w-[1280px] mx-auto p-5 md:p-8 lg:p-10 animate-in fade-in duration-700">
+          {children}
+        </main>
+
+        <footer className="py-10 border-t border-paper text-center">
+          <p className="text-[11px] font-bold text-ink-light/45 uppercase tracking-[0.2em]">
+            Handcrafted by Chef axin · 2026
+          </p>
+        </footer>
+      </div>
+
+      <div className="md:hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-white/92 backdrop-blur-xl px-5 py-2.5 rounded-full flex items-center gap-7 shadow-paper-deep border border-paper">
+        {navItems.map((item) => {
+          const isActive = isActiveRoute(item.to);
+
+          return (
+            <Link
+              key={item.to}
+              to={item.to}
+              title={item.label}
+              className={`transition-colors ${isActive ? 'text-sage' : 'text-ink-light hover:text-ink'}`}
+            >
+              <item.icon className="h-5 w-5" strokeWidth={2.5} />
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
